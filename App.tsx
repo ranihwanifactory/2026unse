@@ -4,6 +4,7 @@ import FortuneResultView from './components/FortuneResultView';
 import LoadingScreen from './components/LoadingScreen';
 import { UserInfo, FortuneResult, AppState } from './types';
 import { generateFortune } from './services/geminiService';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.INPUT);
@@ -32,60 +33,92 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen korean-pattern bg-slate-900 text-slate-100 flex flex-col items-center py-10 px-4">
-      {/* Background Overlay for better readability */}
-      <div className="fixed inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900/95 to-black pointer-events-none z-0"></div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative overflow-x-hidden">
+      
+      {/* Background Ambience */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-900/10 rounded-full blur-[120px]"></div>
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      </div>
 
       {/* Main Content Area */}
-      <main className="relative z-10 w-full max-w-4xl flex flex-col items-center min-h-[80vh] justify-center">
+      <main className="relative z-10 flex-grow flex flex-col items-center justify-center p-4 md:p-8">
         
-        {/* Title (Only show on Input Screen) */}
-        {appState === AppState.INPUT && (
-          <div className="text-center mb-12 animate-fade-in-down">
-            <span className="text-amber-500 font-bold tracking-widest text-sm mb-2 block font-serif">2026 SPECIAL</span>
-            <h1 className="text-4xl md:text-6xl font-batang font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 drop-shadow-sm mb-4">
-              병오년(丙午年) 운세
-            </h1>
-            <p className="text-gray-400 max-w-md mx-auto leading-relaxed">
-              2026년 붉은 말의 해,<br/>
-              당신의 사주에 숨겨진 기운을 미리 확인해보세요.
-            </p>
-          </div>
-        )}
-
-        {/* View Switcher */}
-        <div className="w-full flex justify-center">
+        <AnimatePresence mode="wait">
           {appState === AppState.INPUT && (
-            <SajuForm onSubmit={handleFormSubmit} isLoading={false} />
+            <motion.div 
+              key="input"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full max-w-4xl flex flex-col items-center"
+            >
+              <div className="text-center mb-12">
+                <span className="inline-block px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-amber-500 text-xs font-bold tracking-[0.2em] mb-4">
+                  2026 SPECIAL EDITION
+                </span>
+                <h1 className="text-5xl md:text-7xl font-batang font-bold text-white mb-6 tracking-tight drop-shadow-2xl">
+                  병오년<span className="text-amber-500">.</span>
+                </h1>
+                <p className="text-slate-400 max-w-md mx-auto leading-relaxed text-lg">
+                  2026년 붉은 말의 해,<br/>
+                  인공지능이 당신의 사주팔자를 분석하여<br/> 
+                  한 해의 흐름을 읽어드립니다.
+                </p>
+              </div>
+              <SajuForm onSubmit={handleFormSubmit} isLoading={false} />
+            </motion.div>
           )}
 
           {appState === AppState.LOADING && (
-            <LoadingScreen />
+            <motion.div 
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full flex justify-center"
+            >
+              <LoadingScreen />
+            </motion.div>
           )}
 
           {appState === AppState.RESULT && fortuneResult && (
-            <FortuneResultView result={fortuneResult} onReset={handleReset} />
+            <motion.div
+              key="result"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="w-full"
+            >
+              <FortuneResultView result={fortuneResult} onReset={handleReset} />
+            </motion.div>
           )}
 
           {appState === AppState.ERROR && (
-            <div className="text-center bg-red-900/20 p-8 rounded-xl border border-red-500/30">
+             <motion.div 
+              key="error"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center bg-red-950/30 p-8 rounded-3xl border border-red-500/30 backdrop-blur-md max-w-md"
+            >
               <div className="text-4xl mb-4">⚠️</div>
-              <p className="text-red-300 mb-6">{errorMsg}</p>
+              <h3 className="text-xl font-bold text-red-200 mb-2">분석 오류</h3>
+              <p className="text-red-300/80 mb-6">{errorMsg}</p>
               <button 
                 onClick={handleReset}
-                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors font-medium"
               >
                 다시 시도하기
               </button>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 mt-12 text-center text-xs text-gray-600">
-        <p>Powered by Google Gemini | 2026년 병오년 운세 서비스</p>
-        <p className="mt-1">재미로 보는 운세입니다. 맹신하지 마세요.</p>
+      <footer className="relative z-10 py-6 text-center text-xs text-slate-600 border-t border-white/5 bg-slate-950/50 backdrop-blur-sm">
+        <p>© 2026 Fortune AI. Powered by Google Gemini.</p>
+        <p className="mt-1 opacity-70">재미로 보는 운세입니다. 맹신하지 마세요.</p>
       </footer>
     </div>
   );
