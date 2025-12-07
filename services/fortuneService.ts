@@ -1,9 +1,6 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { UserSajuData, FortuneResult } from "../types";
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const fortuneSchema: Schema = {
   type: Type.OBJECT,
   properties: {
@@ -40,6 +37,12 @@ const fortuneSchema: Schema = {
 };
 
 export const getGeminiFortune = async (data: UserSajuData): Promise<FortuneResult> => {
+  if (!process.env.API_KEY) {
+    throw new Error("API Key가 설정되지 않았습니다. 개발자 도구 또는 설정에서 API_KEY를 확인해주세요.");
+  }
+
+  // Initialize the client inside the function to ensure the API key is available at execution time
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const model = "gemini-2.5-flash"; // Fast and capable model
 
   const prompt = `
