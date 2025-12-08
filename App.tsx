@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WelcomeScreen from './components/WelcomeScreen';
 import InputForm from './components/InputForm';
 import RitualLoading from './components/RitualLoading';
@@ -10,6 +10,26 @@ const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.WELCOME);
   const [userData, setUserData] = useState<UserSajuData | null>(null);
   const [fortuneResult, setFortuneResult] = useState<FortuneResult | null>(null);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    // Listen for PWA install prompt
+    const handler = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+    }
+  };
 
   const handleEnterApp = () => {
     setAppState(AppState.INPUT);
@@ -39,7 +59,13 @@ const App: React.FC = () => {
   const renderScreen = () => {
     switch (appState) {
       case AppState.WELCOME:
-        return <WelcomeScreen onEnter={handleEnterApp} />;
+        return (
+          <WelcomeScreen 
+            onEnter={handleEnterApp} 
+            installPrompt={installPrompt} 
+            onInstall={handleInstallApp} 
+          />
+        );
       case AppState.INPUT:
         return <InputForm onSubmit={handleFormSubmit} onBack={() => setAppState(AppState.WELCOME)} />;
       case AppState.RITUAL:

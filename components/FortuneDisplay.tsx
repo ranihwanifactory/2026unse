@@ -8,6 +8,24 @@ interface FortuneDisplayProps {
 }
 
 const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onReset }) => {
+  const handleShare = async () => {
+    const shareData = {
+      title: '천기누설 - AI 신점',
+      text: `${userData.name}님의 2025년 운세: ${result.yearTitle}\n\nAI 무당이 봐주는 신년운세, 지금 확인해보세요.`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('링크가 복사되었습니다.');
+      }
+    } catch (err) {
+      console.log('Share failed', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0f0518] py-12 px-4 md:px-8 flex justify-center items-start fade-in">
       <div className="max-w-4xl w-full bg-[#e8dfc8] text-[#2a1a1a] p-1 md:p-2 rounded-sm shadow-2xl relative overflow-hidden">
@@ -54,10 +72,16 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
             <p className="text-lg">{result.luckyItems}</p>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-12 flex flex-col md:flex-row gap-4 justify-center">
+            <button 
+              onClick={handleShare}
+              className="px-8 py-3 bg-[#3d1024] border border-[#e8dfc8]/20 text-[#e8dfc8] font-title text-lg rounded hover:bg-[#5c1c2c] transition-colors shadow-lg flex-1 md:flex-none"
+            >
+              결과 공유하기
+            </button>
             <button 
               onClick={onReset}
-              className="px-8 py-3 bg-[#5c2e2e] text-[#e8dfc8] font-title text-lg rounded hover:bg-[#3d1024] transition-colors shadow-lg"
+              className="px-8 py-3 bg-[#5c2e2e] text-[#e8dfc8] font-title text-lg rounded hover:bg-[#3d1024] transition-colors shadow-lg flex-1 md:flex-none"
             >
               다른 사람 운세 보기
             </button>
