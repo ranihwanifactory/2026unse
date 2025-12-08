@@ -1,6 +1,31 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { UserSajuData, FortuneResult } from "../types";
 
+// Helper function to safely get the API Key in various environments
+const getApiKey = (): string | undefined => {
+  // 1. Check for Vite environment variable (Most likely for Vercel + React/Vue)
+  // We cast to 'any' to avoid TypeScript errors if types aren't configured for import.meta
+  try {
+    if (import.meta && (import.meta as any).env && (import.meta as any).env.VITE_API_KEY) {
+      return (import.meta as any).env.VITE_API_KEY;
+    }
+  } catch (e) {
+    // Ignore error if import.meta is not available
+  }
+
+  // 2. Check for Create React App environment variable
+  if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_KEY) {
+    return process.env.REACT_APP_API_KEY;
+  }
+
+  // 3. Fallback to standard API_KEY (Node.js or custom webpack define)
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    return process.env.API_KEY;
+  }
+
+  return undefined;
+};
+
 const fortuneSchema: Schema = {
   type: Type.OBJECT,
   properties: {
@@ -37,12 +62,19 @@ const fortuneSchema: Schema = {
 };
 
 export const getGeminiFortune = async (data: UserSajuData): Promise<FortuneResult> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API Key가 설정되지 않았습니다. 개발자 도구 또는 설정에서 API_KEY를 확인해주세요.");
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    throw new Error(
+      "API Key를 찾을 수 없습니다.\n\n" +
+      "Vercel 배포 시:\n" +
+      "Environment Variables에서 변수명을 'VITE_API_KEY'로 설정해주세요.\n" +
+      "(보안상 브라우저에서는 'VITE_' 접두사가 붙은 변수만 읽을 수 있습니다.)"
+    );
   }
 
   // Initialize the client inside the function to ensure the API key is available at execution time
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: apiKey });
   const model = "gemini-2.5-flash"; // Fast and capable model
 
   const prompt = `
