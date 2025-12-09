@@ -54,19 +54,6 @@ export interface ManseResult {
     missing: string[]; // 없는 오행
     excess: string[]; // 과다 오행
   };
-  // New fields for charts
-  shipseong: {
-    bi: number; // 비겁 (Friend/Self)
-    sik: number; // 식상 (Output)
-    jae: number; // 재성 (Wealth)
-    gwan: number; // 관성 (Power)
-    in: number; // 인성 (Resource)
-  };
-  strength: {
-    score: number; // 0 (Very Weak) to 100 (Very Strong), 50 is Neutral
-    label: string; // e.g., "신약", "중화", "신강"
-    description: string;
-  };
   daewoon: {
     age: number;
     stem: string;

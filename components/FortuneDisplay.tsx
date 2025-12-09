@@ -114,63 +114,56 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
           </div>
         </section>
 
-        {/* New: Strength Index (Sinkang/Sinyak) */}
-        <section className="bg-white rounded-3xl p-6 card-shadow">
-          <h3 className="font-cute text-lg font-bold text-gray-800 mb-4">💪 신강 / 신약 지수</h3>
-          <div className="relative pt-6 pb-2">
-            {/* Background Bar */}
-            <div className="h-4 w-full rounded-full bg-gradient-to-r from-blue-200 via-gray-200 to-red-300"></div>
-            
-            {/* Markers */}
-            <div className="flex justify-between text-xs text-gray-400 mt-2 font-bold">
-              <span>극신약</span>
-              <span>신약</span>
-              <span>중화</span>
-              <span>신강</span>
-              <span>극신강</span>
+        {/* Ohaeng Chart */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-3xl p-6 card-shadow">
+            <h3 className="font-cute text-lg font-bold text-gray-800 mb-4">오행 분석</h3>
+            <div className="flex items-center justify-center gap-8">
+              {/* Donut Chart */}
+              <div className="relative w-32 h-32 rounded-full" style={donutStyle}>
+                <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center flex-col">
+                  <span className="text-xs text-gray-400">가장 강한</span>
+                  <span className="font-bold text-lg text-gray-800">
+                    {Object.entries(result.ohaeng).reduce((a, b) => 
+                      (typeof a[1] === 'number' && typeof b[1] === 'number' && a[1] > b[1]) ? a : b
+                    )[0] === 'wood' ? '목(Wood)' :
+                    Object.entries(result.ohaeng).reduce((a, b) => (typeof a[1] === 'number' && typeof b[1] === 'number' && a[1] > b[1]) ? a : b)[0] === 'fire' ? '화(Fire)' :
+                    Object.entries(result.ohaeng).reduce((a, b) => (typeof a[1] === 'number' && typeof b[1] === 'number' && a[1] > b[1]) ? a : b)[0] === 'earth' ? '토(Earth)' :
+                    Object.entries(result.ohaeng).reduce((a, b) => (typeof a[1] === 'number' && typeof b[1] === 'number' && a[1] > b[1]) ? a : b)[0] === 'metal' ? '금(Metal)' : '수(Water)'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Legend */}
+              <div className="space-y-1 text-xs">
+                {[
+                  { l: '목(나무)', v: result.ohaeng.wood, c: 'bg-green-400' },
+                  { l: '화(불)', v: result.ohaeng.fire, c: 'bg-red-400' },
+                  { l: '토(땅)', v: result.ohaeng.earth, c: 'bg-yellow-400' },
+                  { l: '금(쇠)', v: result.ohaeng.metal, c: 'bg-gray-400' },
+                  { l: '수(물)', v: result.ohaeng.water, c: 'bg-blue-400' },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${item.c}`}></div>
+                    <span className="text-gray-600">{item.l}</span>
+                    <span className="font-bold">{item.v}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
-
-            {/* Indicator */}
-            <div 
-              className="absolute top-4 w-6 h-6 bg-white border-4 border-gray-800 rounded-full shadow-md transform -translate-x-1/2 -translate-y-1/2 transition-all duration-1000 ease-out"
-              style={{ left: `${Math.min(Math.max(result.strength.score, 0), 100)}%` }}
-            ></div>
-          </div>
-          <div className="mt-4 text-center">
-            <span className="text-xl font-bold text-gray-800">{result.strength.label}</span>
-            <p className="text-sm text-gray-500 mt-1">{result.strength.description}</p>
-          </div>
-        </section>
-
-        {/* New: Ohaeng Relationship Diagram (My Ohaeng) */}
-        <section className="bg-white rounded-3xl p-6 card-shadow">
-          <h3 className="font-cute text-lg font-bold text-gray-800 mb-4">🌟 나의 오행 관계도</h3>
-          <p className="text-xs text-gray-500 mb-6 text-center">가운데가 '나'를 뜻하며 화살표는 기운의 흐름(생/극)을 나타냅니다.</p>
-          
-          <div className="flex justify-center">
-            <OhaengRelationChart myElement={result.userInfo.element} />
+             {result.ohaeng.missing.length > 0 && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-xl text-center text-xs text-gray-500">
+                  💡 부족한 오행: <span className="font-bold text-gray-700">{result.ohaeng.missing.join(', ')}</span>
+                </div>
+              )}
           </div>
 
-          <div className="mt-6 grid grid-cols-5 gap-1 text-center text-xs">
-             <div className="bg-green-100 p-2 rounded-lg text-green-800">목<br/>{result.ohaeng.wood}%</div>
-             <div className="bg-red-100 p-2 rounded-lg text-red-800">화<br/>{result.ohaeng.fire}%</div>
-             <div className="bg-yellow-100 p-2 rounded-lg text-yellow-800">토<br/>{result.ohaeng.earth}%</div>
-             <div className="bg-gray-100 p-2 rounded-lg text-gray-800">금<br/>{result.ohaeng.metal}%</div>
-             <div className="bg-blue-100 p-2 rounded-lg text-blue-800">수<br/>{result.ohaeng.water}%</div>
+          <div className="bg-white rounded-3xl p-6 card-shadow flex flex-col">
+            <h3 className="font-cute text-lg font-bold text-gray-800 mb-4">내 성격 키워드</h3>
+            <div className="flex-1 bg-indigo-50 rounded-2xl p-4 text-sm text-gray-700 leading-relaxed overflow-y-auto">
+              {result.analysis.personality}
+            </div>
           </div>
-        </section>
-
-        {/* Shipseong Analysis (Bar Chart) */}
-        <section className="bg-white rounded-3xl p-6 card-shadow">
-          <h3 className="font-cute text-lg font-bold text-gray-800 mb-4">🔮 십성 분석 (기질 분포)</h3>
-          <div className="space-y-4">
-            <ShipseongBar label="비겁 (나와 같은 기운 / 주체성)" value={result.shipseong.bi} color="bg-indigo-400" />
-            <ShipseongBar label="식상 (표현력 / 재능)" value={result.shipseong.sik} color="bg-pink-400" />
-            <ShipseongBar label="재성 (재물운 / 결과)" value={result.shipseong.jae} color="bg-green-400" />
-            <ShipseongBar label="관성 (직업 / 명예)" value={result.shipseong.gwan} color="bg-gray-400" />
-            <ShipseongBar label="인성 (학업 / 사랑)" value={result.shipseong.in} color="bg-yellow-400" />
-          </div>
-          <p className="text-xs text-gray-400 mt-4 text-right">* 각 기질의 비율이 높을수록 해당 성향이 강하게 나타납니다.</p>
         </section>
 
         {/* Daewoon (Luck Cycles) */}
@@ -249,95 +242,5 @@ const AnalysisBox = ({ title, content, highlight }: { title: string, content: st
     <p className="text-gray-600">{content}</p>
   </div>
 );
-
-// Helper for Shipseong Bar
-const ShipseongBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
-  <div className="flex flex-col gap-1">
-    <div className="flex justify-between text-xs font-bold text-gray-600">
-      <span>{label}</span>
-      <span>{value}%</span>
-    </div>
-    <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-      <div 
-        className={`h-full ${color} rounded-full transition-all duration-1000`} 
-        style={{ width: `${value}%` }}
-      ></div>
-    </div>
-  </div>
-);
-
-// Helper SVG Chart for My Ohaeng Relation
-const OhaengRelationChart = ({ myElement }: { myElement: string }) => {
-  // Simple circular layout for Wood -> Fire -> Earth -> Metal -> Water -> Wood
-  const elements = [
-    { name: '목', color: '#4ade80', cx: 100, cy: 30 },
-    { name: '화', color: '#f87171', cx: 170, cy: 80 },
-    { name: '토', color: '#facc15', cx: 150, cy: 160 },
-    { name: '금', color: '#94a3b8', cx: 50, cy: 160 },
-    { name: '수', color: '#60a5fa', cx: 30, cy: 80 },
-  ];
-
-  // Map element character (including possible english) to index
-  const getIndex = (el: string) => {
-    if (el.includes('목') || el.includes('Wood')) return 0;
-    if (el.includes('화') || el.includes('Fire')) return 1;
-    if (el.includes('토') || el.includes('Earth')) return 2;
-    if (el.includes('금') || el.includes('Metal')) return 3;
-    if (el.includes('수') || el.includes('Water')) return 4;
-    return 0; // Default
-  };
-
-  const myIdx = getIndex(myElement);
-
-  return (
-    <svg width="200" height="200" viewBox="0 0 200 200">
-      {/* Connecting Lines (Pentagon) */}
-      <polygon points="100,30 170,80 150,160 50,160 30,80" fill="none" stroke="#e2e8f0" strokeWidth="2" />
-      
-      {/* Arrows indicating flow (simplified) */}
-      <path d="M100 30 L160 75" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M170 80 L155 150" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M150 160 L60 160" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M50 160 L35 90" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M30 80 L90 35" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-
-      <defs>
-        <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L6,3 z" fill="#cbd5e1" />
-        </marker>
-      </defs>
-
-      {/* Nodes */}
-      {elements.map((el, i) => (
-        <g key={i}>
-          <circle 
-            cx={el.cx} 
-            cy={el.cy} 
-            r={i === myIdx ? 18 : 14} 
-            fill={el.color} 
-            className="transition-all duration-500"
-            stroke={i === myIdx ? "#fff" : "none"}
-            strokeWidth={i === myIdx ? 3 : 0}
-            style={{ filter: i === myIdx ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' : '' }}
-          />
-          <text 
-            x={el.cx} 
-            y={el.cy} 
-            dy="0.3em" 
-            textAnchor="middle" 
-            fill={i === myIdx ? "#333" : "#fff"} 
-            fontSize={i === myIdx ? "14" : "10"} 
-            fontWeight="bold"
-          >
-            {el.name}
-          </text>
-          {i === myIdx && (
-             <text x={el.cx} y={el.cy - 25} textAnchor="middle" fontSize="10" fill="#666" fontWeight="bold">나(Me)</text>
-          )}
-        </g>
-      ))}
-    </svg>
-  );
-};
 
 export default FortuneDisplay;
