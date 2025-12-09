@@ -308,10 +308,40 @@ const App: React.FC = () => {
         {renderScreen()}
       </div>
       
-      {/* Kakao AdFit Footer - Hide on Auth Screen */}
+      {/* Kakao AdFit & Info Footer - Hide on Auth Screen */}
       {appState !== AppState.AUTH && (
-        <footer className="w-full bg-[#f8f9fa]">
+        <footer className="w-full bg-[#f8f9fa] flex flex-col items-center pb-8 pt-4">
           <KakaoAdFit />
+          
+          <div className="w-full max-w-3xl px-6 py-6 border-t border-gray-200 flex flex-col items-center gap-3 text-center mt-4">
+             <div className="text-[11px] text-gray-400 flex flex-wrap justify-center items-center gap-2">
+                <span className="font-medium text-gray-500">내운명만세력</span>
+                <span className="text-gray-300">|</span>
+                <a href="mailto:hwanace@naver.com" className="hover:text-gray-600 hover:underline">hwanace@naver.com</a>
+                <span className="text-gray-300">|</span>
+                <span>Made by 도형파파팩토리</span>
+             </div>
+             
+             <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500">
+                <span className="font-bold text-gray-400">Family Sites</span>
+                <a 
+                  href="https://ranihwanibaby.tistory.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm text-gray-600"
+                >
+                  📝 티스토리
+                </a>
+                <a 
+                  href="https://dreamlabapp.vercel.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm text-gray-600"
+                >
+                  💤 드림랩 (꿈해몽)
+                </a>
+             </div>
+          </div>
         </footer>
       )}
     </div>
