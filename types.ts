@@ -98,6 +98,21 @@ export interface ChongunResult {
   advice: string;
 }
 
+// New Interface for Compatibility (Gunghap)
+export interface GunghapResult {
+  score: number; // 0 to 100
+  summary: string; // One line summary
+  details: {
+    personalityMatch: string; // 성격 궁합
+    valueMatch: string; // 가치관 궁합
+    loveStyle: string; // 연애 스타일
+    conflictResolution: string; // 갈등 해결 방식
+  };
+  goodPoints: string[]; // 좋은 점 3가지
+  badPoints: string[]; // 주의할 점 3가지
+  advice: string; // 총평 및 조언
+}
+
 export enum AppState {
   WELCOME,
   HUB,      // New state for Main Menu
@@ -109,4 +124,5 @@ export enum AppState {
 export enum AppMode {
   MANSE,    // Classic Manse Chart
   CHONGUN,  // General Fortune Text
+  GUNGHAP,  // Compatibility
 }

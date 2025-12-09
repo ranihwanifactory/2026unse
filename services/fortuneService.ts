@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { UserSajuData, ManseResult, ChongunResult } from "../types";
+import { UserSajuData, ManseResult, ChongunResult, GunghapResult } from "../types";
 
 // Helper function to safely get the API Key
 const getApiKey = (): string | undefined => {
@@ -156,6 +156,28 @@ const chongunSchema: Schema = {
   }
 };
 
+// --- Schema definitions for GunghapResult ---
+const gunghapSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    score: { type: Type.NUMBER, description: "Compatibility score 0-100" },
+    summary: { type: Type.STRING },
+    details: {
+      type: Type.OBJECT,
+      properties: {
+        personalityMatch: { type: Type.STRING, description: "Personality compatibility" },
+        valueMatch: { type: Type.STRING, description: "Values compatibility" },
+        loveStyle: { type: Type.STRING, description: "Love style comparison" },
+        conflictResolution: { type: Type.STRING, description: "How they handle conflicts" }
+      }
+    },
+    goodPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
+    badPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
+    advice: { type: Type.STRING }
+  }
+};
+
+
 // --- API Calls ---
 
 export const getGeminiFortune = async (data: UserSajuData): Promise<ManseResult> => {
@@ -198,13 +220,12 @@ export const getChongunFortune = async (data: UserSajuData): Promise<ChongunResu
   if (!apiKey) throw new Error("API Key가 설정되지 않았습니다.");
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
-  const model = "gemini-2.5-flash"; // Using flash for speed/text generation
+  const model = "gemini-2.5-flash";
 
   const prompt = `
     당신은 통찰력 있는 사주 명리학자 '도사님'입니다.
     사용자 정보를 바탕으로 깊이 있는 '사주 총운'을 상세하게 풀이해주세요.
-    말투는 차분하고 신뢰감 있으며, 사용자의 마음을 꿰뚫어 보는 듯한 문체를 사용하세요. (예: "당신은 ~한 사람입니다.", "~하는 경향이 있군요.")
-
+    
     [사용자 정보]
     이름: ${data.name}
     성별: ${data.gender}
@@ -215,15 +236,8 @@ export const getChongunFortune = async (data: UserSajuData): Promise<ChongunResu
     [필수 포함 내용]
     1. 사주 총론 요약 (한눈에 보는 나)
     2. 나를 표현하는 키워드 3~4개
-    3. 상세 풀이 항목:
-       - 내가 아는 내 모습 (내면)
-       - 남이 보는 내 모습 (외면/사회성)
-       - 타고난 재능과 적성
-       - 타고난 재물운
-       - 타고난 애정운
-       - 타고난 일복 (직업운)
-       - 타고난 인복 (대인관계)
-    4. 도사님의 따뜻한 조언
+    3. 상세 풀이 항목: 내면, 외면, 재능, 재물, 애정, 직업, 인복
+    4. 따뜻한 조언
 
     JSON 스키마를 준수하여 데이터를 반환하세요.
   `;
@@ -235,10 +249,50 @@ export const getChongunFortune = async (data: UserSajuData): Promise<ChongunResu
       systemInstruction: "You are a wise Saju fortune teller. Provide detailed, insightful text readings in Korean.",
       responseMimeType: "application/json",
       responseSchema: chongunSchema,
-      temperature: 0.7, // Higher temperature for more creative/natural text
+      temperature: 0.7,
     },
   });
 
   if (response.text) return JSON.parse(response.text) as ChongunResult;
   throw new Error("사주 총운 생성 실패");
+};
+
+export const getGunghapFortune = async (user1: UserSajuData, user2: UserSajuData): Promise<GunghapResult> => {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("API Key가 설정되지 않았습니다.");
+
+  const ai = new GoogleGenAI({ apiKey: apiKey });
+  const model = "gemini-2.5-flash";
+
+  const prompt = `
+    당신은 궁합 전문 사주가입니다. 두 사람의 사주를 분석하여 궁합을 봐주세요.
+
+    [사용자 1 (본인)]
+    이름: ${user1.name}, 성별: ${user1.gender}, 생년월일: ${user1.birthDate} ${user1.birthTime}, ${user1.calendarType}
+
+    [사용자 2 (상대방)]
+    이름: ${user2.name}, 성별: ${user2.gender}, 생년월일: ${user2.birthDate} ${user2.birthTime}, ${user2.calendarType}
+
+    [요구 사항]
+    1. 궁합 점수(0~100점)를 계산하세요.
+    2. 두 사람의 성격, 가치관, 연애 스타일, 갈등 해결 방식을 상세히 분석하세요.
+    3. 서로에게 좋은 점 3가지와 주의해야 할 점 3가지를 제시하세요.
+    4. 관계를 발전시키기 위한 실질적인 조언을 해주세요.
+    
+    JSON 스키마를 엄격히 준수하세요.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: model,
+    contents: prompt,
+    config: {
+      systemInstruction: "You are a Saju compatibility expert. Return detailed compatibility analysis in Korean.",
+      responseMimeType: "application/json",
+      responseSchema: gunghapSchema,
+      temperature: 0.5,
+    },
+  });
+
+  if (response.text) return JSON.parse(response.text) as GunghapResult;
+  throw new Error("궁합 분석 실패");
 };
