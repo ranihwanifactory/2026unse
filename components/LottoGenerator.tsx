@@ -5,11 +5,13 @@ import { getLottoLuck } from '../services/fortuneService';
 interface LottoGeneratorProps {
   userData: UserSajuData;
   onReset: () => void;
+  onOpenProfile: () => void;
+  isGuest: boolean;
 }
 
 type SelectionMode = 'INCLUDE' | 'EXCLUDE';
 
-const LottoGenerator: React.FC<LottoGeneratorProps> = ({ userData, onReset }) => {
+const LottoGenerator: React.FC<LottoGeneratorProps> = ({ userData, onReset, onOpenProfile, isGuest }) => {
   const [loading, setLoading] = useState(false);
   const [aiLuck, setAiLuck] = useState<LottoLuckResult | null>(null);
   
@@ -114,11 +116,16 @@ const LottoGenerator: React.FC<LottoGeneratorProps> = ({ userData, onReset }) =>
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-24 fade-in">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex justify-between items-center">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex justify-between items-center">
         <h1 className="font-cute text-lg font-bold text-gray-800">사주 로또 생성기 🎱</h1>
-        <button onClick={onReset} className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600 hover:bg-gray-200 transition">
-          메뉴로
-        </button>
+        <div className="flex gap-2">
+          <button onClick={onReset} className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition" title="홈으로">
+            🏠
+          </button>
+          <button onClick={onOpenProfile} className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition" title={isGuest ? "로그인" : "프로필"}>
+            {isGuest ? '🔐' : '👤'}
+          </button>
+        </div>
       </header>
 
       <div className="max-w-xl mx-auto p-4 space-y-6">

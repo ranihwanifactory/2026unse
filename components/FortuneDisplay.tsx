@@ -5,6 +5,8 @@ interface FortuneDisplayProps {
   result: ManseResult;
   userData: UserSajuData;
   onReset: () => void;
+  onOpenProfile: () => void;
+  isGuest: boolean;
 }
 
 // Element Color Helper
@@ -17,7 +19,7 @@ const getElementColor = (element: string) => {
   return 'text-gray-800 bg-gray-50';
 };
 
-const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onReset }) => {
+const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onReset, onOpenProfile, isGuest }) => {
   
   // Calculate Ohaeng chart gradient
   const total = 100;
@@ -42,11 +44,16 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-20 fade-in">
       {/* Top Navigation / Header */}
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex justify-between items-center">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex justify-between items-center">
         <h1 className="font-cute text-lg font-bold text-gray-800">내운명 만세력</h1>
-        <button onClick={onReset} className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600 hover:bg-gray-200 transition">
-          다시 입력
-        </button>
+        <div className="flex gap-2">
+          <button onClick={onReset} className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition" title="홈으로">
+            🏠
+          </button>
+          <button onClick={onOpenProfile} className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition" title={isGuest ? "로그인" : "프로필"}>
+            {isGuest ? '🔐' : '👤'}
+          </button>
+        </div>
       </header>
 
       <div className="max-w-3xl mx-auto p-4 space-y-6">

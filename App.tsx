@@ -113,9 +113,13 @@ const App: React.FC = () => {
     setAppState(AppState.WELCOME);
   };
 
-  // Hub -> Profile
+  // Hub/App -> Profile (or Login if guest)
   const handleOpenProfile = () => {
-    setAppState(AppState.PROFILE);
+    if (currentUser) {
+      setAppState(AppState.PROFILE);
+    } else {
+      setAppState(AppState.AUTH);
+    }
   };
 
   // Hub -> Input (with specific mode)
@@ -251,6 +255,8 @@ const App: React.FC = () => {
               result={manseResult} 
               userData={userData} 
               onReset={handleResetToMenu} 
+              onOpenProfile={handleOpenProfile}
+              isGuest={!currentUser}
             />
           );
         } else if (appMode === AppMode.CHONGUN && chongunResult && userData) {
@@ -258,7 +264,9 @@ const App: React.FC = () => {
             <ChongunDisplay 
               result={chongunResult} 
               userData={userData} 
-              onReset={handleResetToMenu} 
+              onReset={handleResetToMenu}
+              onOpenProfile={handleOpenProfile}
+              isGuest={!currentUser}
             />
           );
         } else if (appMode === AppMode.GUNGHAP && gunghapResult && userData && partnerData) {
@@ -268,6 +276,8 @@ const App: React.FC = () => {
               user1={userData}
               user2={partnerData}
               onReset={handleResetToMenu}
+              onOpenProfile={handleOpenProfile}
+              isGuest={!currentUser}
             />
           );
         } else if (appMode === AppMode.LOTTO && userData) {
@@ -275,6 +285,8 @@ const App: React.FC = () => {
              <LottoGenerator
                userData={userData}
                onReset={handleResetToMenu}
+               onOpenProfile={handleOpenProfile}
+               isGuest={!currentUser}
              />
            );
         } else {
