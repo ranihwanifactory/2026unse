@@ -2,11 +2,12 @@ import React from 'react';
 
 interface WelcomeScreenProps {
   onEnter: () => void;
+  onLogin: () => void;
   installPrompt?: any;
   onInstall?: () => void;
 }
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, installPrompt, onInstall }) => {
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onLogin, installPrompt, onInstall }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#fdfbf7] p-6 text-center relative overflow-hidden">
       
@@ -32,13 +33,20 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, installPrompt, o
             onClick={onEnter}
             className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold text-lg shadow-lg hover:bg-gray-800 transition-transform transform hover:-translate-y-1 active:scale-95"
           >
-            내 운명 확인하러 가기
+            바로 시작하기
+          </button>
+
+          <button
+            onClick={onLogin}
+            className="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold text-lg shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            로그인 / 회원가입 🔐
           </button>
 
           {installPrompt && (
             <button
               onClick={onInstall}
-              className="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold text-lg shadow-sm hover:bg-gray-50 transition-colors"
+              className="mt-2 w-full py-3 bg-indigo-50 text-indigo-600 rounded-2xl font-bold text-sm shadow-none hover:bg-indigo-100 transition-colors"
             >
               앱 설치하기 ⬇️
             </button>
@@ -46,8 +54,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, installPrompt, o
         </div>
 
         <p className="mt-8 text-xs text-gray-400">
-          복잡한 한자 없이, 귀엽고 편하게 확인하세요.<br/>
-          AI가 상세하게 풀어주는 당신의 사주
+          로그인하면 사주 정보를 저장하여<br/>
+          매번 입력할 필요 없이 편리하게 이용할 수 있어요.
         </p>
       </div>
     </div>

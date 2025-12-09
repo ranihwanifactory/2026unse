@@ -113,9 +113,19 @@ export interface GunghapResult {
   advice: string; // 총평 및 조언
 }
 
+// New Interface for Lotto Luck
+export interface LottoLuckResult {
+  luckyNumbers: number[]; // AI recommended 5-6 numbers
+  luckyColor: string;
+  direction: string; // e.g., "서쪽"
+  reason: string; // Why these numbers? (Based on element/Saju)
+}
+
 export enum AppState {
   WELCOME,
-  HUB,      // New state for Main Menu
+  AUTH,     // Login/Signup
+  PROFILE,  // User Profile Edit
+  HUB,      // Main Menu
   INPUT,
   LOADING,
   RESULT,
@@ -125,4 +135,5 @@ export enum AppMode {
   MANSE,    // Classic Manse Chart
   CHONGUN,  // General Fortune Text
   GUNGHAP,  // Compatibility
+  LOTTO,    // Lotto Generator
 }

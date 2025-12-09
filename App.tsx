@@ -7,14 +7,22 @@ import RitualLoading from './components/RitualLoading';
 import FortuneDisplay from './components/FortuneDisplay';
 import ChongunDisplay from './components/ChongunDisplay';
 import GunghapDisplay from './components/GunghapDisplay';
+import LottoGenerator from './components/LottoGenerator';
 import KakaoAdFit from './components/KakaoAdFit';
+import AuthScreen from './components/AuthScreen';
+import Profile from './components/Profile';
 import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult } from './types';
 import { getGeminiFortune, getChongunFortune, getGunghapFortune } from './services/fortuneService';
+import { auth, getUserProfile, saveUserProfile, logoutUser } from './services/firebase';
+import { User, onAuthStateChanged } from 'firebase/auth';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.WELCOME);
   const [appMode, setAppMode] = useState<AppMode>(AppMode.MANSE);
   
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
   // Data State
   const [userData, setUserData] = useState<UserSajuData | null>(null);
   const [partnerData, setPartnerData] = useState<UserSajuData | null>(null);
@@ -36,6 +44,43 @@ const App: React.FC = () => {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  // Firebase Auth Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setCurrentUser(user);
+        // User logged in, fetch profile
+        try {
+          const profile = await getUserProfile(user.uid);
+          if (profile) {
+            setUserData(profile);
+            // If we are currently in AUTH or WELCOME, go to HUB
+            if (appState === AppState.AUTH || appState === AppState.WELCOME) {
+               setAppState(AppState.HUB);
+            }
+          } else {
+            // New user, no profile yet. 
+            // If they are coming from AuthScreen, send to Input to create profile
+            if (appState === AppState.AUTH) {
+               setAppState(AppState.INPUT);
+            }
+          }
+        } catch (e) {
+          console.error("Error fetching profile", e);
+        }
+      } else {
+        setCurrentUser(null);
+        setUserData(null);
+        // If logged out, we generally don't force page change unless strictly required
+        // But if in Profile/Auth, go to Welcome
+        if (appState === AppState.PROFILE) {
+           setAppState(AppState.WELCOME);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [appState]);
+
   const handleInstallApp = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
@@ -45,20 +90,67 @@ const App: React.FC = () => {
     }
   };
 
-  // Welcome -> Hub
-  const handleEnterHub = () => {
+  // Welcome -> Main (Start)
+  const handleEnterWelcome = () => {
+    // Allows Guest Access: Always go to HUB.
+    // If logged in, the AuthListener might have already moved us, but this is safe.
     setAppState(AppState.HUB);
+  };
+
+  // Welcome -> Auth (Login Click)
+  const handleLoginEnter = () => {
+    setAppState(AppState.AUTH);
+  };
+
+  // Auth -> Back
+  const handleAuthBack = () => {
+    setAppState(AppState.WELCOME);
+  };
+
+  // Logout
+  const handleLogout = async () => {
+    await logoutUser();
+    setAppState(AppState.WELCOME);
+  };
+
+  // Hub -> Profile
+  const handleOpenProfile = () => {
+    setAppState(AppState.PROFILE);
   };
 
   // Hub -> Input (with specific mode)
   const handleSelectApp = (mode: AppMode) => {
     setAppMode(mode);
-    setAppState(AppState.INPUT);
+    
+    // Check if user has data (Logged in users with saved profile)
+    if (userData && (mode === AppMode.MANSE || mode === AppMode.CHONGUN || mode === AppMode.LOTTO)) {
+      if (mode === AppMode.LOTTO) {
+        setAppState(AppState.RESULT); 
+      } else {
+        // Logged in user with data -> Skip input, go to loading/result
+        setAppState(AppState.LOADING);
+        handleFormSubmit(userData); // Auto-submit existing data
+      }
+    } else {
+      // Guest or New User -> Go to Input
+      setAppState(AppState.INPUT);
+    }
   };
 
   // Input -> Loading -> Result (Single User)
   const handleFormSubmit = async (data: UserSajuData) => {
     setUserData(data);
+
+    // Save to Firestore ONLY if logged in
+    if (currentUser) {
+      saveUserProfile(currentUser.uid, data).catch(console.error);
+    }
+
+    if (appMode === AppMode.LOTTO) {
+      setAppState(AppState.RESULT);
+      return;
+    }
+
     setAppState(AppState.LOADING);
 
     try {
@@ -72,7 +164,7 @@ const App: React.FC = () => {
       setAppState(AppState.RESULT);
     } catch (error) {
       alert("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n" + (error as Error).message);
-      setAppState(AppState.INPUT); // Go back to input on error
+      setAppState(AppState.INPUT); 
     }
   };
 
@@ -93,8 +185,6 @@ const App: React.FC = () => {
   };
 
   const handleResetToMenu = () => {
-    // Keep userData if desired, but for now resetting everything to clean state
-    setUserData(null);
     setPartnerData(null);
     setManseResult(null);
     setChongunResult(null);
@@ -107,16 +197,34 @@ const App: React.FC = () => {
       case AppState.WELCOME:
         return (
           <WelcomeScreen 
-            onEnter={handleEnterHub} 
+            onEnter={handleEnterWelcome} 
+            onLogin={handleLoginEnter}
             installPrompt={installPrompt} 
             onInstall={handleInstallApp} 
           />
         );
+      case AppState.AUTH:
+        return (
+          <AuthScreen onBack={handleAuthBack} />
+        );
+      case AppState.PROFILE:
+        return currentUser ? (
+          <Profile 
+            user={currentUser}
+            initialData={userData}
+            onBack={() => setAppState(AppState.HUB)}
+            onSaved={(data) => setUserData(data)}
+          />
+        ) : null;
       case AppState.HUB:
         return (
           <MainHub 
             onSelectApp={handleSelectApp} 
             userName={userData?.name} 
+            isGuest={!currentUser}
+            onOpenProfile={handleOpenProfile}
+            onLogout={handleLogout}
+            onLogin={handleLoginEnter}
           />
         );
       case AppState.INPUT:
@@ -162,6 +270,13 @@ const App: React.FC = () => {
               onReset={handleResetToMenu}
             />
           );
+        } else if (appMode === AppMode.LOTTO && userData) {
+           return (
+             <LottoGenerator
+               userData={userData}
+               onReset={handleResetToMenu}
+             />
+           );
         } else {
           return (
             <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -181,10 +296,12 @@ const App: React.FC = () => {
         {renderScreen()}
       </div>
       
-      {/* Kakao AdFit Footer */}
-      <footer className="w-full bg-[#f8f9fa]">
-        <KakaoAdFit />
-      </footer>
+      {/* Kakao AdFit Footer - Hide on Auth Screen */}
+      {appState !== AppState.AUTH && (
+        <footer className="w-full bg-[#f8f9fa]">
+          <KakaoAdFit />
+        </footer>
+      )}
     </div>
   );
 };

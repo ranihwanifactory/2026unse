@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { UserSajuData, ManseResult, ChongunResult, GunghapResult } from "../types";
+import { UserSajuData, ManseResult, ChongunResult, GunghapResult, LottoLuckResult } from "../types";
 
 // Helper function to safely get the API Key
 const getApiKey = (): string | undefined => {
@@ -177,6 +177,17 @@ const gunghapSchema: Schema = {
   }
 };
 
+// --- Schema definitions for LottoLuckResult ---
+const lottoLuckSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    luckyNumbers: { type: Type.ARRAY, items: { type: Type.INTEGER }, description: "Array of 6 lucky numbers (1-45)" },
+    luckyColor: { type: Type.STRING },
+    direction: { type: Type.STRING },
+    reason: { type: Type.STRING, description: "Reasoning based on Saju elements" }
+  }
+};
+
 
 // --- API Calls ---
 
@@ -295,4 +306,42 @@ export const getGunghapFortune = async (user1: UserSajuData, user2: UserSajuData
 
   if (response.text) return JSON.parse(response.text) as GunghapResult;
   throw new Error("궁합 분석 실패");
+};
+
+export const getLottoLuck = async (data: UserSajuData): Promise<LottoLuckResult> => {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("API Key가 설정되지 않았습니다.");
+
+  const ai = new GoogleGenAI({ apiKey: apiKey });
+  const model = "gemini-2.5-flash";
+
+  const prompt = `
+    당신은 사주와 수비학 전문가입니다. 사용자 정보를 바탕으로 로또(1~45) 행운의 숫자를 추천해주세요.
+
+    [사용자 정보]
+    이름: ${data.name}
+    성별: ${data.gender}
+    생년월일: ${data.birthDate} ${data.birthTime}
+    
+    [요구사항]
+    1. 사용자의 사주(용신/희신)에 부족한 기운을 채워주는 숫자 6개를 추천하세요 (1~45 범위).
+    2. 행운의 색상과 방위를 알려주세요.
+    3. 이 숫자들이 왜 행운인지 사주학적 근거를 짧게 설명하세요.
+
+    JSON 스키마를 준수하세요.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: model,
+    contents: prompt,
+    config: {
+      systemInstruction: "You are a Numerology and Saju expert. Return JSON data.",
+      responseMimeType: "application/json",
+      responseSchema: lottoLuckSchema,
+      temperature: 0.8,
+    },
+  });
+
+  if (response.text) return JSON.parse(response.text) as LottoLuckResult;
+  throw new Error("로또 번호 추천 실패");
 };

@@ -4,16 +4,49 @@ import { AppMode } from '../types';
 interface MainHubProps {
   onSelectApp: (mode: AppMode) => void;
   userName?: string;
+  isGuest: boolean;
+  onOpenProfile: () => void;
+  onLogout: () => void;
+  onLogin: () => void;
 }
 
-const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName }) => {
+const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpenProfile, onLogout, onLogin }) => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] p-4 flex flex-col fade-in">
-      <header className="py-6 px-2">
-        <h1 className="font-cute text-2xl font-bold text-gray-800">
-          {userName ? `${userName}님, 환영합니다 👋` : '내운명 연구소'}
-        </h1>
-        <p className="text-gray-500 text-sm mt-1">오늘 당신에게 필요한 조언은 무엇인가요?</p>
+      <header className="py-6 px-2 flex justify-between items-start">
+        <div>
+          <h1 className="font-cute text-2xl font-bold text-gray-800">
+            {userName ? `${userName}님, 환영합니다 👋` : '방문자님, 환영합니다 👋'}
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">오늘 당신에게 필요한 조언은 무엇인가요?</p>
+        </div>
+        <div className="flex gap-2">
+           {isGuest ? (
+             <button 
+               onClick={onLogin}
+               className="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold shadow-md hover:bg-gray-800 transition-all"
+             >
+               로그인
+             </button>
+           ) : (
+             <>
+               <button 
+                 onClick={onOpenProfile}
+                 className="w-10 h-10 bg-white rounded-full card-shadow flex items-center justify-center text-lg hover:bg-gray-50 transition-colors"
+                 title="프로필 수정"
+               >
+                 👤
+               </button>
+               <button 
+                 onClick={onLogout}
+                 className="w-10 h-10 bg-white rounded-full card-shadow flex items-center justify-center text-lg hover:bg-gray-50 transition-colors"
+                 title="로그아웃"
+               >
+                 👋
+               </button>
+             </>
+           )}
+        </div>
       </header>
 
       <div className="flex-1 grid grid-cols-1 gap-4 overflow-y-auto pb-10">
@@ -70,6 +103,25 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName }) => {
               그 사람과 나는 얼마나 잘 맞을까?<br/>
               성격, 가치관, 연애 스타일까지<br/>
               두 사람의 케미를 분석해드립니다.
+            </p>
+          </div>
+        </button>
+
+        {/* App Card 4: Lotto Generator */}
+        <button 
+          onClick={() => onSelectApp(AppMode.LOTTO)}
+          className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-50 rounded-bl-full -mr-8 -mt-8 z-0 group-hover:bg-yellow-100 transition-colors"></div>
+          <div className="relative z-10">
+            <div className="w-12 h-12 bg-yellow-100 rounded-2xl flex items-center justify-center text-2xl mb-4">
+              🎱
+            </div>
+            <h3 className="font-bold text-lg text-gray-800 mb-1">사주 로또 생성기</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              나의 사주에 부족한 기운을 채우는<br/>
+              행운의 숫자를 추천받고<br/>
+              자동/반자동 번호를 조합해보세요.
             </p>
           </div>
         </button>
