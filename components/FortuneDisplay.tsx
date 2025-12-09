@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ManseResult, UserSajuData, Pillar } from '../types';
 
 interface FortuneDisplayProps {
@@ -21,25 +21,11 @@ const getElementColor = (element: string) => {
 
 const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onReset, onOpenProfile, isGuest }) => {
   
-  // Calculate Ohaeng chart gradient
+  // Calculate Ohaeng chart gradient (simplified for donut visual if needed, but we use bar/numbers now)
   const total = 100;
   let currentAngle = 0;
-  const gradientParts = [
-    { el: '목', val: result.ohaeng.wood, color: '#4ade80' },
-    { el: '화', val: result.ohaeng.fire, color: '#f87171' },
-    { el: '토', val: result.ohaeng.earth, color: '#facc15' },
-    { el: '금', val: result.ohaeng.metal, color: '#94a3b8' },
-    { el: '수', val: result.ohaeng.water, color: '#60a5fa' },
-  ].map(p => {
-    const start = currentAngle;
-    const end = currentAngle + (p.val / total) * 360;
-    currentAngle = end;
-    return `${p.color} ${start}deg ${end}deg`;
-  });
-
-  const donutStyle = {
-    background: `conic-gradient(${gradientParts.join(', ')})`
-  };
+  // This logic was for a donut chart not currently rendered, keeping it if we need it later or removing unused.
+  // Kept for potential future use or context preservation.
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-20 fade-in">
@@ -149,13 +135,15 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
           </div>
         </section>
 
-        {/* New: Ohaeng Relationship Diagram (My Ohaeng) */}
+        {/* Interactive Ohaeng Relationship Diagram */}
         <section className="bg-white rounded-3xl p-6 card-shadow">
           <h3 className="font-cute text-lg font-bold text-gray-800 mb-4">🌟 나의 오행 관계도</h3>
-          <p className="text-xs text-gray-500 mb-6 text-center">가운데가 '나'를 뜻하며 화살표는 기운의 흐름(생/극)을 나타냅니다.</p>
+          <p className="text-xs text-gray-500 mb-6 text-center">
+            각 오행을 클릭하여 나와의 관계를 확인해보세요.
+          </p>
           
           <div className="flex justify-center">
-            <OhaengRelationChart myElement={result.userInfo.element} />
+            <InteractiveOhaengChart myElement={result.userInfo.element} />
           </div>
 
           <div className="mt-6 grid grid-cols-5 gap-1 text-center text-xs">
@@ -180,19 +168,42 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
           <p className="text-xs text-gray-400 mt-4 text-right">* 각 기질의 비율이 높을수록 해당 성향이 강하게 나타납니다.</p>
         </section>
 
-        {/* Daewoon (Luck Cycles) */}
-        <section className="bg-white rounded-3xl p-6 card-shadow">
+        {/* Daewoon (Luck Cycles) Timeline */}
+        <section className="bg-white rounded-3xl p-6 card-shadow overflow-hidden">
           <h3 className="font-cute text-lg font-bold text-gray-800 mb-2">📅 대운 흐름 (10년 주기)</h3>
-          <p className="text-xs text-gray-500 mb-4">대운은 10년마다 바뀌는 큰 운의 흐름을 말합니다.</p>
-          <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x">
-            {result.daewoon.map((cycle, idx) => (
-              <div key={idx} className="flex-shrink-0 w-20 flex flex-col items-center bg-gray-50 rounded-xl p-3 border border-gray-100 snap-center">
-                <span className="text-xs text-gray-400 mb-1">{cycle.age}세~</span>
-                <div className="font-bold text-lg text-gray-800">{cycle.stem}{cycle.branch}</div>
-                <div className="text-xs text-gray-500 mb-1">({cycle.stemHangul}{cycle.branchHangul})</div>
-                <span className="text-[10px] text-indigo-400 mt-1">{cycle.tenGod}</span>
-              </div>
-            ))}
+          <p className="text-xs text-gray-500 mb-6">인생의 계절이 바뀌는 시기입니다. 10년마다 큰 운이 들어옵니다.</p>
+          
+          <div className="relative overflow-x-auto pb-4">
+            {/* Timeline Line container */}
+            <div className="min-w-max px-4">
+                <div className="relative pt-8 pb-4">
+                    {/* Connecting Line */}
+                    <div className="absolute top-[3.5rem] left-0 w-full h-1 bg-gray-100 rounded-full" />
+                    
+                    <div className="flex gap-6 relative z-10">
+                        {result.daewoon.map((cycle, idx) => (
+                        <div key={idx} className="flex flex-col items-center group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                            {/* Age Bubble */}
+                            <div className="mb-3 bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md relative">
+                                {cycle.age}세~
+                                <div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+                            </div>
+                            
+                            {/* The Node */}
+                            <div className="w-14 h-14 rounded-full bg-white border-4 border-gray-100 flex flex-col items-center justify-center shadow-sm group-hover:border-indigo-300 group-hover:shadow-md transition-all relative bg-gradient-to-br from-white to-gray-50">
+                                <span className="text-base font-serif font-bold text-gray-800 leading-none">{cycle.stem}{cycle.branch}</span>
+                                <span className="text-[9px] text-gray-400 mt-0.5">{cycle.stemHangul}{cycle.branchHangul}</span>
+                            </div>
+
+                            {/* Ten God Label */}
+                            <span className="text-[10px] text-indigo-500 mt-3 font-medium bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                                {cycle.tenGod}
+                            </span>
+                        </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
           </div>
         </section>
 
@@ -273,17 +284,9 @@ const ShipseongBar = ({ label, value, color }: { label: string, value: number, c
   </div>
 );
 
-// Helper SVG Chart for My Ohaeng Relation
-const OhaengRelationChart = ({ myElement }: { myElement: string }) => {
-  // Simple circular layout for Wood -> Fire -> Earth -> Metal -> Water -> Wood
-  const elements = [
-    { name: '목', color: '#4ade80', cx: 100, cy: 30 },
-    { name: '화', color: '#f87171', cx: 170, cy: 80 },
-    { name: '토', color: '#facc15', cx: 150, cy: 160 },
-    { name: '금', color: '#94a3b8', cx: 50, cy: 160 },
-    { name: '수', color: '#60a5fa', cx: 30, cy: 80 },
-  ];
-
+// Interactive SVG Chart for Ohaeng Relation
+const InteractiveOhaengChart = ({ myElement }: { myElement: string }) => {
+  
   // Map element character (including possible english) to index
   const getIndex = (el: string) => {
     if (el.includes('목') || el.includes('Wood')) return 0;
@@ -295,55 +298,145 @@ const OhaengRelationChart = ({ myElement }: { myElement: string }) => {
   };
 
   const myIdx = getIndex(myElement);
+  const [selectedIdx, setSelectedIdx] = useState<number>(myIdx);
+
+  // Simple circular layout for Wood -> Fire -> Earth -> Metal -> Water -> Wood
+  const elements = [
+    { name: '목', color: '#4ade80', cx: 100, cy: 30, desc: '나무(Wood)' },
+    { name: '화', color: '#f87171', cx: 170, cy: 80, desc: '불(Fire)' },
+    { name: '토', color: '#facc15', cx: 150, cy: 160, desc: '흙(Earth)' },
+    { name: '금', color: '#94a3b8', cx: 50, cy: 160, desc: '금속(Metal)' },
+    { name: '수', color: '#60a5fa', cx: 30, cy: 80, desc: '물(Water)' },
+  ];
+
+  // Logic to determine relationship text based on My Element vs Selected Element
+  const getRelationshipInfo = (targetIdx: number) => {
+    // 0: Same (Bi-Geop)
+    // 1: I produce (Sik-Sang)
+    // 2: I control (Jae-Seong)
+    // 3: Controls me (Gwan-Seong) - Wait, in cycle: 0->1->2->3->4->0
+    // Wood(0) controls Earth(2). Wood(0) is controlled by Metal(3).
+    // Let's use distance from myIdx.
+    
+    // Distance in cycle (target - me + 5) % 5
+    // 0: Same (Bi)
+    // 1: Output (Sik) - 生
+    // 2: Wealth (Jae) - 克 (I control)
+    // 3: Power (Gwan) - 克 (Controls me) -> Wait. Wood(0) -> Earth(2) is diff 2. Wood(0) <- Metal(3). Metal is diff 3.
+    // 4: Resource (In) - 生 (Produces me)
+
+    const diff = (targetIdx - myIdx + 5) % 5;
+    
+    switch (diff) {
+      case 0:
+        return {
+          title: '비겁 (나와 같은 기운)',
+          desc: '주체성, 고집, 형제, 친구, 경쟁자를 의미합니다. 내 힘이 되어주지만 나눌 것도 많습니다.'
+        };
+      case 1:
+        return {
+          title: '식상 (내가 생하는 기운)',
+          desc: '표현력, 재능, 말솜씨, 아이디어를 의미합니다. 나의 기운을 밖으로 표출하는 통로입니다.'
+        };
+      case 2:
+        return {
+          title: '재성 (내가 극하는 기운)',
+          desc: '재물, 성과, 결과물, 소유욕을 의미합니다. 내가 관리하고 다루어야 할 대상입니다.'
+        };
+      case 3:
+        return {
+          title: '관성 (나를 극하는 기운)',
+          desc: '직장, 명예, 규율, 참을성을 의미합니다. 나를 통제하고 사회적 틀에 맞추게 합니다.'
+        };
+      case 4:
+        return {
+          title: '인성 (나를 생하는 기운)',
+          desc: '학업, 문서, 어머니, 후원자를 의미합니다. 나를 돕고 성장시키는 영양분입니다.'
+        };
+      default:
+        return { title: '', desc: '' };
+    }
+  };
+
+  const info = getRelationshipInfo(selectedIdx);
 
   return (
-    <svg width="200" height="200" viewBox="0 0 200 200">
-      {/* Connecting Lines (Pentagon) */}
-      <polygon points="100,30 170,80 150,160 50,160 30,80" fill="none" stroke="#e2e8f0" strokeWidth="2" />
-      
-      {/* Arrows indicating flow (simplified) */}
-      <path d="M100 30 L160 75" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M170 80 L155 150" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M150 160 L60 160" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M50 160 L35 90" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
-      <path d="M30 80 L90 35" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" />
+    <div className="flex flex-col items-center w-full">
+      <svg width="220" height="220" viewBox="0 0 200 200" className="mb-4">
+        {/* Connecting Lines (Pentagon) */}
+        <polygon points="100,30 170,80 150,160 50,160 30,80" fill="none" stroke="#e2e8f0" strokeWidth="2" />
+        
+        {/* Arrows indicating flow (simplified) */}
+        <path d="M100 30 L160 75" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" opacity="0.5" />
+        <path d="M170 80 L155 150" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" opacity="0.5" />
+        <path d="M150 160 L60 160" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" opacity="0.5" />
+        <path d="M50 160 L35 90" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" opacity="0.5" />
+        <path d="M30 80 L90 35" stroke="#e2e8f0" strokeWidth="1" markerEnd="url(#arrow)" opacity="0.5" />
 
-      <defs>
-        <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L6,3 z" fill="#cbd5e1" />
-        </marker>
-      </defs>
+        <defs>
+          <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L6,3 z" fill="#cbd5e1" />
+          </marker>
+        </defs>
 
-      {/* Nodes */}
-      {elements.map((el, i) => (
-        <g key={i}>
-          <circle 
-            cx={el.cx} 
-            cy={el.cy} 
-            r={i === myIdx ? 18 : 14} 
-            fill={el.color} 
-            className="transition-all duration-500"
-            stroke={i === myIdx ? "#fff" : "none"}
-            strokeWidth={i === myIdx ? 3 : 0}
-            style={{ filter: i === myIdx ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' : '' }}
-          />
-          <text 
-            x={el.cx} 
-            y={el.cy} 
-            dy="0.3em" 
-            textAnchor="middle" 
-            fill={i === myIdx ? "#333" : "#fff"} 
-            fontSize={i === myIdx ? "14" : "10"} 
-            fontWeight="bold"
-          >
-            {el.name}
-          </text>
-          {i === myIdx && (
-             <text x={el.cx} y={el.cy - 25} textAnchor="middle" fontSize="10" fill="#666" fontWeight="bold">나(Me)</text>
-          )}
-        </g>
-      ))}
-    </svg>
+        {/* Nodes */}
+        {elements.map((el, i) => {
+            const isSelected = i === selectedIdx;
+            const isMe = i === myIdx;
+            
+            return (
+                <g 
+                  key={i} 
+                  onClick={() => setSelectedIdx(i)} 
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                {/* Selection Ring */}
+                {isSelected && (
+                    <circle cx={el.cx} cy={el.cy} r={24} fill="none" stroke={el.color} strokeWidth="2" opacity="0.5" className="animate-pulse" />
+                )}
+
+                <circle 
+                    cx={el.cx} 
+                    cy={el.cy} 
+                    r={isMe ? 18 : 16} 
+                    fill={el.color} 
+                    stroke={isSelected ? "#fff" : "none"}
+                    strokeWidth={isSelected ? 3 : 0}
+                    style={{ 
+                        filter: isSelected ? 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                        transition: 'all 0.3s ease'
+                    }}
+                />
+                <text 
+                    x={el.cx} 
+                    y={el.cy} 
+                    dy="0.3em" 
+                    textAnchor="middle" 
+                    fill={isSelected ? "#333" : "#fff"} 
+                    fontSize={isMe ? "14" : "12"} 
+                    fontWeight="bold"
+                    style={{ pointerEvents: 'none' }}
+                >
+                    {el.name}
+                </text>
+                {isMe && (
+                    <text x={el.cx} y={el.cy - 25} textAnchor="middle" fontSize="10" fill="#666" fontWeight="bold">나(Me)</text>
+                )}
+                </g>
+            );
+        })}
+      </svg>
+
+      {/* Info Box */}
+      <div className="bg-gray-50 rounded-xl p-4 w-full text-center border border-gray-100 transition-all duration-300">
+        <h4 className="font-bold text-gray-800 mb-1">
+            {elements[selectedIdx].name} - {info.title}
+        </h4>
+        <p className="text-sm text-gray-600 leading-relaxed">
+            {info.desc}
+        </p>
+      </div>
+    </div>
   );
 };
 
