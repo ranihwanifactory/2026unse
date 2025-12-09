@@ -7,77 +7,49 @@ interface WelcomeScreenProps {
 }
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, installPrompt, onInstall }) => {
-  const handleShare = async () => {
-    const shareData = {
-      title: '천기누설 - AI 신점',
-      text: 'AI 무당이 봐주는 2025년 신년운세, 지금 확인해보세요.',
-      url: window.location.href,
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('링크가 복사되었습니다. 주변에 널리 알리세요.');
-      }
-    } catch (err) {
-      console.log('Share failed', err);
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center p-6 relative overflow-hidden fade-in">
-      {/* Background Decor */}
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2568&auto=format&fit=crop')] opacity-20 bg-cover bg-center pointer-events-none mix-blend-overlay"></div>
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f0518]/80 to-[#0f0518] pointer-events-none"></div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#fdfbf7] p-6 text-center relative overflow-hidden">
+      
+      {/* Decorative Background Elements */}
+      <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+      <div className="absolute bottom-10 right-10 w-48 h-48 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
 
-      <div className="z-10 animate-float">
-        <div className="mb-6 opacity-80">
-          <svg className="w-16 h-16 mx-auto text-red-700" fill="currentColor" viewBox="0 0 24 24">
-             <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
-          </svg>
+      <div className="z-10 flex flex-col items-center max-w-md w-full">
+        <div className="mb-6 animate-[bounce_3s_infinite]">
+          <span className="text-6xl filter drop-shadow-md">🔮</span>
         </div>
-        <h1 className="font-title text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-t from-yellow-700 to-yellow-200 mb-4 drop-shadow-lg">
-          천기누설
+        
+        <h1 className="font-cute text-4xl font-bold text-gray-800 mb-2">
+          포스텔 만세력
         </h1>
-        <p className="text-xl md:text-2xl text-gray-400 font-light tracking-widest mb-12">
-          당신의 운명을 마주할 준비가 되었는가
+        <p className="text-gray-500 mb-10 font-medium">
+          가장 쉽고 예쁜 내 운명의 지도
         </p>
-      </div>
 
-      <div className="z-10 flex flex-col gap-4 items-center w-full max-w-xs">
-        <button
-          onClick={onEnter}
-          className="w-full group relative px-8 py-4 bg-[#2a0a18] border border-red-900/50 text-red-100 font-title text-xl rounded-sm hover:bg-[#3d1024] transition-all duration-500 shadow-[0_0_20px_rgba(220,20,60,0.3)] hover:shadow-[0_0_40px_rgba(220,20,60,0.6)]"
-        >
-          <span className="relative z-10 group-hover:tracking-widest transition-all duration-300">
-            점집 입장하기
-          </span>
-          <div className="absolute inset-0 h-full w-full scale-0 rounded-sm transition-all duration-300 group-hover:scale-100 group-hover:bg-red-900/20"></div>
-        </button>
-
-        <div className="flex w-full gap-3">
+        <div className="w-full space-y-3">
           <button
-            onClick={handleShare}
-            className="flex-1 py-3 bg-[#1a0b14] border border-[#5c2e2e]/50 text-gray-400 font-title hover:text-yellow-200 hover:border-yellow-700 transition-all rounded-sm text-sm"
+            onClick={onEnter}
+            className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold text-lg shadow-lg hover:bg-gray-800 transition-transform transform hover:-translate-y-1 active:scale-95"
           >
-            복채 나누기 (공유)
+            내 사주 분석하기
           </button>
-          
+
           {installPrompt && (
             <button
               onClick={onInstall}
-              className="flex-1 py-3 bg-[#1a0b14] border border-[#5c2e2e]/50 text-gray-400 font-title hover:text-yellow-200 hover:border-yellow-700 transition-all rounded-sm text-sm"
+              className="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold text-lg shadow-sm hover:bg-gray-50 transition-colors"
             >
-              점집 저장하기 (설치)
+              앱 설치하기 ⬇️
             </button>
           )}
         </div>
+
+        <p className="mt-8 text-xs text-gray-400">
+          복잡한 만세력, 이제 귀엽고 편하게 확인하세요.<br/>
+          AI가 분석하는 당신의 운세
+        </p>
       </div>
-      
-      <p className="absolute bottom-8 text-xs text-gray-600 z-10">
-        AI 신점이므로 재미로만 봐주시길 바랍니다.
-      </p>
     </div>
   );
 };

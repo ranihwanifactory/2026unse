@@ -3,68 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0f0518">
+    <meta name="theme-color" content="#fdfbf7">
     <link rel="manifest" href="manifest.json">
-    <title>천기누설 - 신년운세</title>
+    <title>포스텔 만세력 - 내 운명의 지도</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
       body {
-        font-family: 'Gowun Batang', serif;
-        background-color: #0f0518;
-        color: #e0d4bc;
+        font-family: 'Noto Sans KR', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
       }
-      .font-title {
-        font-family: 'Nanum Myeongjo', serif;
-      }
-      .smoke-bg {
-        background: radial-gradient(circle at 50% 50%, #2a0a18 0%, #0f0518 100%);
+      .font-cute {
+        font-family: 'Gowun Dodum', sans-serif;
       }
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
+        height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #1a0b2e; 
+        background: transparent; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #5c2e2e; 
-        border-radius: 4px;
+        background: #e2e8f0; 
+        border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #7a3e3e; 
-      }
-      @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-      .animate-float {
-        animation: float 6s ease-in-out infinite;
-      }
-      @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 15px rgba(220, 20, 60, 0.2); }
-        50% { box-shadow: 0 0 25px rgba(220, 20, 60, 0.6); }
-      }
-      .glow-border {
-        animation: pulse-glow 3s infinite;
-      }
-      @keyframes mist {
-        0% { opacity: 0.3; transform: translateX(-10%); }
-        50% { opacity: 0.6; transform: translateX(10%); }
-        100% { opacity: 0.3; transform: translateX(-10%); }
-      }
-      .mist-effect {
-        animation: mist 20s infinite linear;
+        background: #cbd5e1; 
       }
       .fade-in {
-        animation: fadeIn 0.8s ease-out forwards;
+        animation: fadeIn 0.6s ease-out forwards;
       }
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
       }
     </style>
   <script type="importmap">

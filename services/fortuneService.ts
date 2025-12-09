@@ -1,96 +1,133 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { UserSajuData, FortuneResult } from "../types";
+import { UserSajuData, ManseResult } from "../types";
 
-// Helper function to safely get the API Key in various environments
+// Helper function to safely get the API Key
 const getApiKey = (): string | undefined => {
-  // 1. Check for Vite environment variable (Most likely for Vercel + React/Vue)
-  // We cast to 'any' to avoid TypeScript errors if types aren't configured for import.meta
   try {
     if (import.meta && (import.meta as any).env && (import.meta as any).env.VITE_API_KEY) {
       return (import.meta as any).env.VITE_API_KEY;
     }
-  } catch (e) {
-    // Ignore error if import.meta is not available
-  }
+  } catch (e) {}
 
-  // 2. Check for Create React App environment variable
-  if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_KEY) {
-    return process.env.REACT_APP_API_KEY;
+  if (typeof process !== 'undefined' && process.env) {
+    if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
+    if (process.env.API_KEY) return process.env.API_KEY;
   }
-
-  // 3. Fallback to standard API_KEY (Node.js or custom webpack define)
-  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
-    return process.env.API_KEY;
-  }
-
   return undefined;
 };
 
-const fortuneSchema: Schema = {
+// Define Schema for structured JSON output
+const pillarSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    yearTitle: {
-      type: Type.STRING,
-      description: "The name of the year (e.g., 2025 Blue Snake Year) in Korean.",
+    stem: { 
+      type: Type.OBJECT, 
+      properties: { 
+        char: { type: Type.STRING }, // e.g., 甲
+        color: { type: Type.STRING }, // e.g., #4CAF50
+        element: { type: Type.STRING }, // e.g., 木
+        tenGod: { type: Type.STRING } // e.g., 비견
+      } 
     },
-    overall: {
-      type: Type.STRING,
-      description: "Overall fortune summary for the year. Poetic and mystical tone.",
+    branch: { 
+      type: Type.OBJECT, 
+      properties: { 
+        char: { type: Type.STRING }, // e.g., 子
+        color: { type: Type.STRING },
+        element: { type: Type.STRING },
+        tenGod: { type: Type.STRING },
+        animal: { type: Type.STRING } // e.g., 쥐
+      } 
     },
-    wealth: {
-      type: Type.STRING,
-      description: "Wealth and financial fortune.",
-    },
-    love: {
-      type: Type.STRING,
-      description: "Love, marriage, and relationship fortune.",
-    },
-    health: {
-      type: Type.STRING,
-      description: "Health and physical well-being fortune.",
-    },
-    career: {
-      type: Type.STRING,
-      description: "Career, business, and academic fortune.",
-    },
-    luckyItems: {
-      type: Type.STRING,
-      description: "Lucky colors, directions, or items for the user.",
-    },
-  },
-  required: ["yearTitle", "overall", "wealth", "love", "health", "career", "luckyItems"],
+    shipseong: { type: Type.ARRAY, items: { type: Type.STRING } },
+    unseong: { type: Type.STRING },
+    sinsal: { type: Type.ARRAY, items: { type: Type.STRING } }
+  }
 };
 
-export const getGeminiFortune = async (data: UserSajuData): Promise<FortuneResult> => {
+const manseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    userInfo: {
+      type: Type.OBJECT,
+      properties: {
+        animal: { type: Type.STRING },
+        color: { type: Type.STRING }, // Color name e.g., "푸른"
+        element: { type: Type.STRING }, // Day Master element
+      }
+    },
+    pillars: {
+      type: Type.OBJECT,
+      properties: {
+        year: pillarSchema,
+        month: pillarSchema,
+        day: pillarSchema,
+        time: pillarSchema
+      }
+    },
+    ohaeng: {
+      type: Type.OBJECT,
+      properties: {
+        wood: { type: Type.NUMBER },
+        fire: { type: Type.NUMBER },
+        earth: { type: Type.NUMBER },
+        metal: { type: Type.NUMBER },
+        water: { type: Type.NUMBER },
+        missing: { type: Type.ARRAY, items: { type: Type.STRING } },
+        excess: { type: Type.ARRAY, items: { type: Type.STRING } }
+      }
+    },
+    daewoon: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          age: { type: Type.NUMBER },
+          stem: { type: Type.STRING },
+          branch: { type: Type.STRING },
+          tenGod: { type: Type.STRING }
+        }
+      }
+    },
+    analysis: {
+      type: Type.OBJECT,
+      properties: {
+        personality: { type: Type.STRING },
+        currentYearLuck: { type: Type.STRING },
+        advice: { type: Type.STRING }
+      }
+    }
+  }
+};
+
+export const getGeminiFortune = async (data: UserSajuData): Promise<ManseResult> => {
   const apiKey = getApiKey();
 
   if (!apiKey) {
-    throw new Error(
-      "API Key를 찾을 수 없습니다.\n\n" +
-      "Vercel 배포 시:\n" +
-      "Environment Variables에서 변수명을 'VITE_API_KEY'로 설정해주세요.\n" +
-      "(보안상 브라우저에서는 'VITE_' 접두사가 붙은 변수만 읽을 수 있습니다.)"
-    );
+    throw new Error("API Key가 설정되지 않았습니다. VITE_API_KEY 환경변수를 확인해주세요.");
   }
 
-  // Initialize the client inside the function to ensure the API key is available at execution time
   const ai = new GoogleGenAI({ apiKey: apiKey });
-  const model = "gemini-2.5-flash"; // Fast and capable model
+  const model = "gemini-2.5-flash";
 
   const prompt = `
-    당신은 대한민국에서 가장 용하다고 소문난 신점 도사(무당)입니다. 
-    사용자의 사주 정보를 바탕으로 2025년(을사년) 신년 운세를 봐주세요.
-    
+    당신은 전문적인 '만세력(Saju Manse)' 계산 및 분석가입니다.
+    다음 사용자 정보를 바탕으로 사주팔자(4기둥), 오행 분석, 대운, 그리고 성격 및 운세 분석을 정확하게 계산하여 JSON 형식으로 반환해 주세요.
+
     [사용자 정보]
     이름: ${data.name}
     성별: ${data.gender}
     생년월일: ${data.birthDate}
-    태어난 시간: ${data.birthTime === 'unknown' ? '모름' : data.birthTime}
-    양력/음력: ${data.calendarType}
+    출생 시간: ${data.birthTime}
+    음력/양력: ${data.calendarType}
+    출생 지역: ${data.birthRegion} (시차 계산용, 한국 기준)
 
-    말투는 예스럽고 권위 있으면서도, 사람을 꿰뚫어 보는 듯한 무속인의 말투(예: "~하구나", "~보이는군", "~해야 할 것이야")를 사용하십시오.
-    단순한 번역투가 아닌, 실제 점집에서 듣는 듯한 한국적인 표현을 사용하세요.
-    좋은 점은 격려하고, 나쁜 점은 피해갈 방도를 넌지시 일러주십시오.
+    [요구 사항]
+    1. 만세력(Pillars): 연주, 월주, 일주, 시주를 정확한 한자(char)와 함께 구하세요. 각 글자의 십성(Ten God), 오행(Element), 12운성, 신살을 포함하세요.
+    2. 색상(Color): 천간/지지 글자의 오행 색상을 Hex Code로 반환하세요 (목:Green, 화:Red, 토:Yellow, 금:Gray/White, 수:Black/Blue).
+    3. 오행 분석(Ohaeng): 전체 사주에서 오행의 분포 비율(%)을 계산하세요. 합이 100이 되도록 하세요.
+    4. 대운(Daewoon): 사용자의 대운수(Daewoon number)를 계산하고, 10년 단위의 대운 흐름을 나열하세요 (나이, 간지).
+    5. 분석(Analysis): 일간(Day Master)을 중심으로 한 성격 분석과 2025년 기준 신년 운세를 친절하고 명확한 존댓말로 작성하세요. 말투는 부드럽고 전문적이어야 합니다.
   `;
 
   try {
@@ -98,20 +135,20 @@ export const getGeminiFortune = async (data: UserSajuData): Promise<FortuneResul
       model: model,
       contents: prompt,
       config: {
-        systemInstruction: "You are a traditional Korean Shaman (Mudang). You provide fortune telling based on Saju (Four Pillars of Destiny). Your output must be strictly in JSON format matching the schema.",
+        systemInstruction: "You are an expert Saju Master. Return only pure JSON data matching the specified schema. Ensure accurate calculation of Saju pillars based on the Gregorian/Lunar date provided.",
         responseMimeType: "application/json",
-        responseSchema: fortuneSchema,
-        temperature: 0.8, // Slightly creative for the "mystical" vibe
+        responseSchema: manseSchema,
+        temperature: 0.4, // Lower temperature for more accurate calculation logic
       },
     });
 
     if (response.text) {
-      return JSON.parse(response.text) as FortuneResult;
+      return JSON.parse(response.text) as ManseResult;
     } else {
-      throw new Error("운세를 점지받지 못했습니다. (Empty Response)");
+      throw new Error("만세력 데이터를 생성하지 못했습니다.");
     }
   } catch (error) {
-    console.error("Fortune telling failed:", error);
-    throw new Error("신령님과의 접신이 불안정합니다. 잠시 후 다시 시도해주세요.");
+    console.error("Saju analysis failed:", error);
+    throw new Error("사주 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
   }
 };

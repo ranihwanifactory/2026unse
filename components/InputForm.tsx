@@ -12,6 +12,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, onBack }) => {
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [calendarType, setCalendarType] = useState<CalendarType>(CalendarType.SOLAR);
+  const [birthRegion, setBirthRegion] = useState('서울'); // Default region
   const [isUnknownTime, setIsUnknownTime] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,65 +25,66 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, onBack }) => {
       birthDate,
       birthTime: isUnknownTime ? 'unknown' : birthTime || '00:00',
       calendarType,
+      birthRegion
     });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 md:p-8 relative fade-in">
-       <button 
-        onClick={onBack}
-        className="absolute top-6 left-6 text-gray-500 hover:text-white transition-colors"
-      >
-        ← 돌아가기
-      </button>
+    <div className="min-h-screen bg-[#f8f9fa] py-10 px-4 flex justify-center items-center">
+      <div className="w-full max-w-lg bg-white rounded-3xl p-8 shadow-xl relative fade-in">
+        <button 
+          onClick={onBack}
+          className="absolute top-6 left-6 text-gray-400 hover:text-gray-800 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        </button>
 
-      <div className="w-full max-w-lg bg-[#1a0b14]/90 border border-[#3d1c26] p-8 md:p-12 rounded-sm shadow-2xl relative glow-border backdrop-blur-sm">
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#2a0a18] px-4 py-1 border border-[#5c2e2e]">
-          <span className="font-title text-yellow-500 text-lg">사주 정보 입력</span>
-        </div>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8 font-cute">
+          사주 정보 입력 📝
+        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* Name */}
-          <div className="space-y-2">
-            <label className="block text-gray-400 text-sm">성함 (Name)</label>
-            <input 
-              type="text" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="홍길동"
-              className="w-full bg-[#0f0518] border-b border-[#5c2e2e] focus:border-red-500 text-gray-200 py-2 px-1 outline-none transition-colors text-center text-lg"
-              required
-            />
-          </div>
-
-          {/* Gender */}
-          <div className="space-y-2">
-            <label className="block text-gray-400 text-sm mb-2">성별 (Gender)</label>
-            <div className="flex gap-4 justify-center">
-              {Object.values(Gender).map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => setGender(g)}
-                  className={`flex-1 py-2 px-4 border ${gender === g ? 'bg-[#3d1024] border-red-500 text-red-100' : 'border-[#2e1a2e] text-gray-500 hover:border-gray-500'} transition-all`}
-                >
-                  {g}
-                </button>
-              ))}
+          {/* Name & Gender */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 pl-1">이름</label>
+              <input 
+                type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="홍길동"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 pl-1">성별</label>
+              <div className="flex bg-gray-50 rounded-xl p-1 border border-gray-200">
+                {Object.values(Gender).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${gender === g ? 'bg-white shadow-sm text-gray-800' : 'text-gray-400'}`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Birth Date & Calendar Type */}
-          <div className="space-y-2">
-            <label className="block text-gray-400 text-sm">생년월일 (Birth Date)</label>
+          {/* Birth Date & Calendar */}
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 pl-1">생년월일</label>
             <div className="flex gap-2 mb-2">
-               {Object.values(CalendarType).map((t) => (
+              {Object.values(CalendarType).map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setCalendarType(t)}
-                  className={`text-xs py-1 px-3 border rounded-full ${calendarType === t ? 'bg-[#3d1024] border-red-500 text-white' : 'border-[#2e1a2e] text-gray-500'}`}
+                  className={`text-xs py-1 px-3 rounded-full border transition-colors ${calendarType === t ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-500 border-gray-200'}`}
                 >
                   {t}
                 </button>
@@ -92,44 +94,55 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, onBack }) => {
               type="date" 
               value={birthDate}
               onChange={(e) => setBirthDate(e.target.value)}
-              className="w-full bg-[#0f0518] border border-[#2e1a2e] text-gray-200 py-3 px-4 rounded-sm outline-none focus:border-red-500 transition-colors"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all"
               required
             />
           </div>
 
-          {/* Birth Time */}
-          <div className="space-y-2">
-            <label className="block text-gray-400 text-sm">태어난 시간 (Birth Time)</label>
-            <div className="flex items-center gap-4">
-              <input 
-                type="time" 
-                value={birthTime}
-                onChange={(e) => setBirthTime(e.target.value)}
-                disabled={isUnknownTime}
-                className={`flex-1 bg-[#0f0518] border border-[#2e1a2e] text-gray-200 py-3 px-4 rounded-sm outline-none focus:border-red-500 transition-colors ${isUnknownTime ? 'opacity-30' : ''}`}
-                required={!isUnknownTime}
-              />
-              <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-400">
+          {/* Birth Time & Region */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 pl-1">태어난 시간</label>
+              <div className="relative">
+                <input 
+                  type="time" 
+                  value={birthTime}
+                  onChange={(e) => setBirthTime(e.target.value)}
+                  disabled={isUnknownTime}
+                  className={`w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all ${isUnknownTime ? 'opacity-30' : ''}`}
+                  required={!isUnknownTime}
+                />
+              </div>
+              <label className="flex items-center gap-2 mt-2 cursor-pointer text-xs text-gray-500">
                 <input 
                   type="checkbox" 
                   checked={isUnknownTime}
                   onChange={(e) => setIsUnknownTime(e.target.checked)}
-                  className="accent-red-700 w-4 h-4"
+                  className="rounded text-blue-500 focus:ring-blue-200"
                 />
                 시간 모름
               </label>
             </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 pl-1">출생 지역 (시/군)</label>
+              <input 
+                type="text" 
+                value={birthRegion}
+                onChange={(e) => setBirthRegion(e.target.value)}
+                placeholder="서울, 부산 등"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all"
+                required
+              />
+            </div>
           </div>
 
-          <div className="pt-6">
-            <button 
-              type="submit"
-              className="w-full bg-gradient-to-r from-[#3d1024] to-[#5c1c2c] hover:from-[#5c1c2c] hover:to-[#7a2e3e] text-white font-title text-xl py-4 rounded-sm shadow-lg border border-red-900/30 transition-all transform hover:-translate-y-1"
-            >
-              운세 확인하기
-            </button>
-          </div>
-
+          <button 
+            type="submit"
+            className="w-full bg-gray-900 text-white font-bold text-lg py-4 rounded-2xl shadow-lg hover:bg-gray-800 transition-all transform hover:-translate-y-1 mt-4"
+          >
+            분석 시작하기 ✨
+          </button>
         </form>
       </div>
     </div>

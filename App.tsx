@@ -3,13 +3,13 @@ import WelcomeScreen from './components/WelcomeScreen';
 import InputForm from './components/InputForm';
 import RitualLoading from './components/RitualLoading';
 import FortuneDisplay from './components/FortuneDisplay';
-import { AppState, UserSajuData, FortuneResult } from './types';
+import { AppState, UserSajuData, ManseResult } from './types';
 import { getGeminiFortune } from './services/fortuneService';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.WELCOME);
   const [userData, setUserData] = useState<UserSajuData | null>(null);
-  const [fortuneResult, setFortuneResult] = useState<FortuneResult | null>(null);
+  const [fortuneResult, setFortuneResult] = useState<ManseResult | null>(null);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   const handleFormSubmit = async (data: UserSajuData) => {
     setUserData(data);
-    setAppState(AppState.RITUAL);
+    setAppState(AppState.LOADING); // Using LOADING state
 
     try {
       // Fetch fortune from Gemini
@@ -45,7 +45,7 @@ const App: React.FC = () => {
       setFortuneResult(result);
       setAppState(AppState.RESULT);
     } catch (error) {
-      alert("신령님과의 연결이 끊겼습니다. 다시 시도해주세요.\n" + (error as Error).message);
+      alert("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n" + (error as Error).message);
       setAppState(AppState.INPUT);
     }
   };
@@ -68,7 +68,7 @@ const App: React.FC = () => {
         );
       case AppState.INPUT:
         return <InputForm onSubmit={handleFormSubmit} onBack={() => setAppState(AppState.WELCOME)} />;
-      case AppState.RITUAL:
+      case AppState.LOADING:
         return <RitualLoading />;
       case AppState.RESULT:
         return (
@@ -78,7 +78,7 @@ const App: React.FC = () => {
               userData={userData} 
               onReset={handleReset} 
             />
-          ) : <div>오류가 발생했습니다.</div>
+          ) : <div>데이터 오류</div>
         );
       default:
         return null;
@@ -86,7 +86,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="antialiased min-h-screen font-serif">
+    <div className="antialiased min-h-screen font-sans text-gray-900">
       {renderScreen()}
     </div>
   );

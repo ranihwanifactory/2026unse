@@ -6,6 +6,7 @@ export enum Gender {
 export enum CalendarType {
   SOLAR = '양력',
   LUNAR = '음력',
+  LEAP = '윤달',
 }
 
 export interface UserSajuData {
@@ -14,21 +15,55 @@ export interface UserSajuData {
   birthDate: string; // YYYY-MM-DD
   birthTime: string; // HH:mm or "unknown"
   calendarType: CalendarType;
+  birthRegion: string; // Added birth region
 }
 
-export interface FortuneResult {
-  yearTitle: string; // e.g., "을사년 (2025)"
-  overall: string;
-  wealth: string;
-  love: string;
-  health: string;
-  career: string;
-  luckyItems: string;
+// Ten Stems (Cheongan) and Twelve Branches (Jiji) structure
+export interface Pillar {
+  stem: { char: string; color: string; element: string; tenGod: string }; // 천간
+  branch: { char: string; color: string; element: string; tenGod: string; animal: string }; // 지지
+  shipseong: string[]; // 지장간 (Hidden stems) - simplified for display
+  unseong: string; // 12 Unseong (12운성)
+  sinsal: string[]; // Sinsal (신살)
+}
+
+export interface ManseResult {
+  userInfo: {
+    animal: string; // 띠
+    color: string; // 띠 색상
+    element: string; // 일간 오행 (Day Master)
+  };
+  pillars: {
+    year: Pillar;
+    month: Pillar;
+    day: Pillar;
+    time: Pillar;
+  };
+  ohaeng: {
+    wood: number;
+    fire: number;
+    earth: number;
+    metal: number;
+    water: number;
+    missing: string[]; // 없는 오행
+    excess: string[]; // 과다 오행
+  };
+  daewoon: {
+    age: number;
+    stem: string;
+    branch: string;
+    tenGod: string; // 대운의 십성
+  }[];
+  analysis: {
+    personality: string; // 성격 분석
+    currentYearLuck: string; // 올해 운세
+    advice: string; // 조언
+  };
 }
 
 export enum AppState {
   WELCOME,
   INPUT,
-  RITUAL, // Loading
+  LOADING,
   RESULT,
 }
