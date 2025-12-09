@@ -32,7 +32,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, installPrompt, o
             onClick={onEnter}
             className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold text-lg shadow-lg hover:bg-gray-800 transition-transform transform hover:-translate-y-1 active:scale-95"
           >
-            내 사주 분석하기
+            내 운명 확인하러 가기
           </button>
 
           {installPrompt && (

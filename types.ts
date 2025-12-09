@@ -54,6 +54,18 @@ export interface ManseResult {
     missing: string[]; // 없는 오행
     excess: string[]; // 과다 오행
   };
+  shipseong: {
+    bi: number; // 비겁 (Friend/Self)
+    sik: number; // 식상 (Output)
+    jae: number; // 재성 (Wealth)
+    gwan: number; // 관성 (Power)
+    in: number; // 인성 (Resource)
+  };
+  strength: {
+    score: number; // 0 (Very Weak) to 100 (Very Strong), 50 is Neutral
+    label: string; // e.g., "신약", "중화", "신강"
+    description: string;
+  };
   daewoon: {
     age: number;
     stem: string;
@@ -69,9 +81,32 @@ export interface ManseResult {
   };
 }
 
+// New Interface for General Fortune (Chongun)
+export interface ChongunResult {
+  userName: string;
+  summary: string; // 사주 총론 요약
+  keywords: string[]; // 핵심 키워드 3~4개
+  sections: {
+    selfView: string;   // 내가 아는 내 모습
+    othersView: string; // 남이 보는 내 모습
+    talent: string;     // 타고난 재능과 적성
+    wealth: string;     // 타고난 재물운
+    love: string;       // 타고난 애정운
+    work: string;       // 타고난 일복/직업
+    health: string;     // 타고난 건강/인복
+  };
+  advice: string;
+}
+
 export enum AppState {
   WELCOME,
+  HUB,      // New state for Main Menu
   INPUT,
   LOADING,
   RESULT,
+}
+
+export enum AppMode {
+  MANSE,    // Classic Manse Chart
+  CHONGUN,  // General Fortune Text
 }
