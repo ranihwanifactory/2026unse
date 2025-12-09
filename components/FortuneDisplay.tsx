@@ -17,15 +17,6 @@ const getElementColor = (element: string) => {
   return 'text-gray-800 bg-gray-50';
 };
 
-const getElementBg = (element: string) => {
-  if (element.includes('목')) return '#4ade80';
-  if (element.includes('화')) return '#f87171';
-  if (element.includes('토')) return '#facc15';
-  if (element.includes('금')) return '#94a3b8';
-  if (element.includes('수')) return '#60a5fa';
-  return '#e2e8f0';
-}
-
 const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onReset }) => {
   
   // Calculate Ohaeng chart gradient
@@ -52,7 +43,7 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
     <div className="min-h-screen bg-[#f8f9fa] pb-20 fade-in">
       {/* Top Navigation / Header */}
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex justify-between items-center">
-        <h1 className="font-cute text-lg font-bold text-gray-800">내 운명의 지도</h1>
+        <h1 className="font-cute text-lg font-bold text-gray-800">내운명 만세력</h1>
         <button onClick={onReset} className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600 hover:bg-gray-200 transition">
           다시 입력
         </button>
@@ -84,9 +75,12 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
           <h3 className="font-cute text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             📊 사주 원국 (Four Pillars)
           </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            나를 이루고 있는 4가지 기둥입니다. 한자 밑에 한글 독음을 참고하세요.
+          </p>
           <div className="grid grid-cols-4 gap-2 text-center">
-            {['시주', '일주', '월주', '연주'].map((label, i) => (
-              <div key={i} className="text-xs text-gray-400 font-bold mb-1">{label}</div>
+            {['시주 (말년)', '일주 (나)', '월주 (사회)', '연주 (초년)'].map((label, i) => (
+              <div key={i} className="text-xs text-gray-500 font-bold mb-1">{label}</div>
             ))}
             
             {/* Stems (Top Row) */}
@@ -106,6 +100,17 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
             <div className="text-[10px] text-indigo-500 font-bold mt-1">본원</div>
             <div className="text-[10px] text-gray-400 mt-1">{result.pillars.month.branch.tenGod}</div>
             <div className="text-[10px] text-gray-400 mt-1">{result.pillars.year.branch.tenGod}</div>
+          </div>
+
+          {/* Pillars Analysis Detail */}
+          <div className="mt-8 space-y-4 border-t border-gray-100 pt-6">
+             <h4 className="font-cute text-md font-bold text-gray-700">📜 내 사주 기둥 상세 풀이</h4>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <AnalysisBox title="일주 (나 자신)" content={result.pillarAnalysis.day} highlight />
+                <AnalysisBox title="월주 (사회/부모)" content={result.pillarAnalysis.month} />
+                <AnalysisBox title="연주 (초년/조상)" content={result.pillarAnalysis.year} />
+                <AnalysisBox title="시주 (말년/자식)" content={result.pillarAnalysis.time} />
+             </div>
           </div>
         </section>
 
@@ -163,13 +168,15 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
 
         {/* Daewoon (Luck Cycles) */}
         <section className="bg-white rounded-3xl p-6 card-shadow">
-          <h3 className="font-cute text-lg font-bold text-gray-800 mb-4">📅 대운 흐름 (10년 주기)</h3>
+          <h3 className="font-cute text-lg font-bold text-gray-800 mb-2">📅 대운 흐름 (10년 주기)</h3>
+          <p className="text-xs text-gray-500 mb-4">대운은 10년마다 바뀌는 큰 운의 흐름을 말합니다.</p>
           <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x">
             {result.daewoon.map((cycle, idx) => (
-              <div key={idx} className="flex-shrink-0 w-16 flex flex-col items-center bg-gray-50 rounded-xl p-3 border border-gray-100 snap-center">
-                <span className="text-xs text-gray-400 mb-1">{cycle.age}세</span>
+              <div key={idx} className="flex-shrink-0 w-20 flex flex-col items-center bg-gray-50 rounded-xl p-3 border border-gray-100 snap-center">
+                <span className="text-xs text-gray-400 mb-1">{cycle.age}세~</span>
                 <div className="font-bold text-lg text-gray-800">{cycle.stem}{cycle.branch}</div>
-                <span className="text-[10px] text-gray-500 mt-1">{cycle.tenGod}</span>
+                <div className="text-xs text-gray-500 mb-1">({cycle.stemHangul}{cycle.branchHangul})</div>
+                <span className="text-[10px] text-indigo-400 mt-1">{cycle.tenGod}</span>
               </div>
             ))}
           </div>
@@ -195,7 +202,7 @@ const FortuneDisplay: React.FC<FortuneDisplayProps> = ({ result, userData, onRes
         {/* Share Button */}
         <div className="text-center pb-8">
            <button 
-             onClick={() => navigator.share ? navigator.share({ title: '내 사주', url: window.location.href }) : alert('주소가 복사되었습니다.')}
+             onClick={() => navigator.share ? navigator.share({ title: '내운명 만세력', url: window.location.href }) : alert('주소가 복사되었습니다.')}
              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-full font-bold text-sm hover:bg-gray-300 transition"
            >
              내 사주 공유하기 📤
@@ -218,11 +225,22 @@ const PillarCard = ({ pillar, part, highlight }: { pillar: Pillar, part: 'stem' 
       ${colorClass} ${highlight ? 'ring-2 ring-indigo-400 ring-offset-2' : ''}
     `}>
       <span className="text-[10px] opacity-70 mb-1">{data.tenGod}</span>
-      <span className="text-2xl md:text-3xl font-serif font-bold">{data.char}</span>
+      <div className="flex flex-col items-center leading-none">
+        <span className="text-2xl md:text-3xl font-serif font-bold">{data.char}</span>
+        <span className="text-xs font-bold mt-1 opacity-80">({data.hangul})</span>
+      </div>
       {part === 'branch' && 'animal' in data && <span className="text-[10px] mt-1">{data.animal}</span>}
       {part === 'stem' && <span className="text-[10px] mt-1 opacity-50">{data.element}</span>}
     </div>
   );
 };
+
+// Helper for detailed analysis box
+const AnalysisBox = ({ title, content, highlight }: { title: string, content: string, highlight?: boolean }) => (
+  <div className={`p-4 rounded-xl text-sm leading-relaxed ${highlight ? 'bg-indigo-50 border border-indigo-100' : 'bg-gray-50 border border-gray-100'}`}>
+    <h5 className={`font-bold mb-2 ${highlight ? 'text-indigo-800' : 'text-gray-700'}`}>{title}</h5>
+    <p className="text-gray-600">{content}</p>
+  </div>
+);
 
 export default FortuneDisplay;

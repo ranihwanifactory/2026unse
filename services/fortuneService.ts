@@ -24,6 +24,7 @@ const pillarSchema: Schema = {
       type: Type.OBJECT, 
       properties: { 
         char: { type: Type.STRING }, // e.g., 甲
+        hangul: { type: Type.STRING }, // e.g., 갑
         color: { type: Type.STRING }, // e.g., #4CAF50
         element: { type: Type.STRING }, // e.g., 木
         tenGod: { type: Type.STRING } // e.g., 비견
@@ -33,6 +34,7 @@ const pillarSchema: Schema = {
       type: Type.OBJECT, 
       properties: { 
         char: { type: Type.STRING }, // e.g., 子
+        hangul: { type: Type.STRING }, // e.g., 자
         color: { type: Type.STRING },
         element: { type: Type.STRING },
         tenGod: { type: Type.STRING },
@@ -65,6 +67,16 @@ const manseSchema: Schema = {
         time: pillarSchema
       }
     },
+    pillarAnalysis: {
+      type: Type.OBJECT,
+      properties: {
+        year: { type: Type.STRING },
+        month: { type: Type.STRING },
+        day: { type: Type.STRING },
+        time: { type: Type.STRING }
+      },
+      description: "Easy explanation of what each pillar means for the user"
+    },
     ohaeng: {
       type: Type.OBJECT,
       properties: {
@@ -84,7 +96,9 @@ const manseSchema: Schema = {
         properties: {
           age: { type: Type.NUMBER },
           stem: { type: Type.STRING },
+          stemHangul: { type: Type.STRING },
           branch: { type: Type.STRING },
+          branchHangul: { type: Type.STRING },
           tenGod: { type: Type.STRING }
         }
       }
@@ -123,11 +137,14 @@ export const getGeminiFortune = async (data: UserSajuData): Promise<ManseResult>
     출생 지역: ${data.birthRegion} (시차 계산용, 한국 기준)
 
     [요구 사항]
-    1. 만세력(Pillars): 연주, 월주, 일주, 시주를 정확한 한자(char)와 함께 구하세요. 각 글자의 십성(Ten God), 오행(Element), 12운성, 신살을 포함하세요.
-    2. 색상(Color): 천간/지지 글자의 오행 색상을 Hex Code로 반환하세요 (목:Green, 화:Red, 토:Yellow, 금:Gray/White, 수:Black/Blue).
-    3. 오행 분석(Ohaeng): 전체 사주에서 오행의 분포 비율(%)을 계산하세요. 합이 100이 되도록 하세요.
-    4. 대운(Daewoon): 사용자의 대운수(Daewoon number)를 계산하고, 10년 단위의 대운 흐름을 나열하세요 (나이, 간지).
-    5. 분석(Analysis): 일간(Day Master)을 중심으로 한 성격 분석과 2025년 기준 신년 운세를 친절하고 명확한 존댓말로 작성하세요. 말투는 부드럽고 전문적이어야 합니다.
+    1. 만세력(Pillars): 연주, 월주, 일주, 시주를 정확한 한자(char)와 **한글 독음(hangul)**과 함께 구하세요. (예: 甲 -> 갑, 子 -> 자).
+    2. 기둥별 상세 풀이(Pillar Analysis): 각 기둥(연주, 월주, 일주, 시주)이 이 사람의 인생에서 어떤 의미를 가지는지 초보자도 이해하기 쉽게 2~3문장으로 설명해주세요. (연주: 초년운/조상, 월주: 부모/사회성, 일주: 본인/배우자, 시주: 말년/자식). 한자 용어 대신 쉬운 말로 풀어주세요.
+    3. 색상(Color): 천간/지지 글자의 오행 색상을 Hex Code로 반환하세요 (목:Green, 화:Red, 토:Yellow, 금:Gray/White, 수:Black/Blue).
+    4. 오행 분석(Ohaeng): 전체 사주에서 오행의 분포 비율(%)을 계산하세요. 합이 100이 되도록 하세요.
+    5. 대운(Daewoon): 사용자의 대운수(Daewoon number)를 계산하고, 10년 단위의 대운 흐름을 나열하세요 (나이, 간지 한자, 간지 한글).
+    6. 분석(Analysis): 일간(Day Master)을 중심으로 한 성격 분석과 2025년 기준 신년 운세를 친절하고 명확한 존댓말로 작성하세요.
+
+    JSON 스키마를 엄격히 따라주세요.
   `;
 
   try {
@@ -135,10 +152,10 @@ export const getGeminiFortune = async (data: UserSajuData): Promise<ManseResult>
       model: model,
       contents: prompt,
       config: {
-        systemInstruction: "You are an expert Saju Master. Return only pure JSON data matching the specified schema. Ensure accurate calculation of Saju pillars based on the Gregorian/Lunar date provided.",
+        systemInstruction: "You are an expert Saju Master. Return only pure JSON data matching the specified schema. Ensure accurate calculation of Saju pillars based on the Gregorian/Lunar date provided. Provide friendly Korean translations for all Hanja terms.",
         responseMimeType: "application/json",
         responseSchema: manseSchema,
-        temperature: 0.4, // Lower temperature for more accurate calculation logic
+        temperature: 0.4,
       },
     });
 

@@ -1,7 +1,7 @@
 {
-  "name": "포스텔 만세력 - AI 운명의 지도",
-  "short_name": "포스텔 만세력",
-  "description": "귀엽고 정확한 AI 사주 만세력 계산기",
+  "name": "내운명 만세력",
+  "short_name": "내운명 만세력",
+  "description": "쉽고 정확한 AI 사주 만세력 계산기",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fdfbf7",

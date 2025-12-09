@@ -17,11 +17,11 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, installPrompt, o
 
       <div className="z-10 flex flex-col items-center max-w-md w-full">
         <div className="mb-6 animate-[bounce_3s_infinite]">
-          <span className="text-6xl filter drop-shadow-md">🔮</span>
+          <span className="text-6xl filter drop-shadow-md">📜</span>
         </div>
         
         <h1 className="font-cute text-4xl font-bold text-gray-800 mb-2">
-          포스텔 만세력
+          내운명 만세력
         </h1>
         <p className="text-gray-500 mb-10 font-medium">
           가장 쉽고 예쁜 내 운명의 지도
@@ -46,8 +46,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, installPrompt, o
         </div>
 
         <p className="mt-8 text-xs text-gray-400">
-          복잡한 만세력, 이제 귀엽고 편하게 확인하세요.<br/>
-          AI가 분석하는 당신의 운세
+          복잡한 한자 없이, 귀엽고 편하게 확인하세요.<br/>
+          AI가 상세하게 풀어주는 당신의 사주
         </p>
       </div>
     </div>

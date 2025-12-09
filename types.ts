@@ -20,8 +20,8 @@ export interface UserSajuData {
 
 // Ten Stems (Cheongan) and Twelve Branches (Jiji) structure
 export interface Pillar {
-  stem: { char: string; color: string; element: string; tenGod: string }; // 천간
-  branch: { char: string; color: string; element: string; tenGod: string; animal: string }; // 지지
+  stem: { char: string; hangul: string; color: string; element: string; tenGod: string }; // 천간
+  branch: { char: string; hangul: string; color: string; element: string; tenGod: string; animal: string }; // 지지
   shipseong: string[]; // 지장간 (Hidden stems) - simplified for display
   unseong: string; // 12 Unseong (12운성)
   sinsal: string[]; // Sinsal (신살)
@@ -39,6 +39,12 @@ export interface ManseResult {
     day: Pillar;
     time: Pillar;
   };
+  pillarAnalysis: {
+    year: string;  // 연주 풀이 (초년, 조상)
+    month: string; // 월주 풀이 (청년, 부모/사회)
+    day: string;   // 일주 풀이 (본인, 배우자)
+    time: string;  // 시주 풀이 (말년, 자식)
+  };
   ohaeng: {
     wood: number;
     fire: number;
@@ -51,7 +57,9 @@ export interface ManseResult {
   daewoon: {
     age: number;
     stem: string;
+    stemHangul: string; // 대운 천간 한글
     branch: string;
+    branchHangul: string; // 대운 지지 한글
     tenGod: string; // 대운의 십성
   }[];
   analysis: {
