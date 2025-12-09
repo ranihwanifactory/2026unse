@@ -89,6 +89,25 @@ const manseSchema: Schema = {
         excess: { type: Type.ARRAY, items: { type: Type.STRING } }
       }
     },
+    shipseong: {
+      type: Type.OBJECT,
+      properties: {
+        bi: { type: Type.NUMBER }, // 비겁 %
+        sik: { type: Type.NUMBER }, // 식상 %
+        jae: { type: Type.NUMBER }, // 재성 %
+        gwan: { type: Type.NUMBER }, // 관성 %
+        in: { type: Type.NUMBER } // 인성 %
+      },
+      description: "Percentage distribution of Ten Gods (Total 100%)"
+    },
+    strength: {
+      type: Type.OBJECT,
+      properties: {
+        score: { type: Type.NUMBER }, // 0 to 100
+        label: { type: Type.STRING }, // e.g. 신약, 중화, 신강
+        description: { type: Type.STRING } // Description of strength
+      }
+    },
     daewoon: {
       type: Type.ARRAY,
       items: {
@@ -126,7 +145,7 @@ export const getGeminiFortune = async (data: UserSajuData): Promise<ManseResult>
 
   const prompt = `
     당신은 전문적인 '만세력(Saju Manse)' 계산 및 분석가입니다.
-    다음 사용자 정보를 바탕으로 사주팔자(4기둥), 오행 분석, 대운, 그리고 성격 및 운세 분석을 정확하게 계산하여 JSON 형식으로 반환해 주세요.
+    다음 사용자 정보를 바탕으로 사주팔자(4기둥), 오행, 십성, 신강신약, 대운, 운세 분석을 정확하게 계산하여 JSON 형식으로 반환해 주세요.
 
     [사용자 정보]
     이름: ${data.name}
@@ -137,12 +156,14 @@ export const getGeminiFortune = async (data: UserSajuData): Promise<ManseResult>
     출생 지역: ${data.birthRegion} (시차 계산용, 한국 기준)
 
     [요구 사항]
-    1. 만세력(Pillars): 연주, 월주, 일주, 시주를 정확한 한자(char)와 **한글 독음(hangul)**과 함께 구하세요. (예: 甲 -> 갑, 子 -> 자).
-    2. 기둥별 상세 풀이(Pillar Analysis): 각 기둥(연주, 월주, 일주, 시주)이 이 사람의 인생에서 어떤 의미를 가지는지 초보자도 이해하기 쉽게 2~3문장으로 설명해주세요. (연주: 초년운/조상, 월주: 부모/사회성, 일주: 본인/배우자, 시주: 말년/자식). 한자 용어 대신 쉬운 말로 풀어주세요.
-    3. 색상(Color): 천간/지지 글자의 오행 색상을 Hex Code로 반환하세요 (목:Green, 화:Red, 토:Yellow, 금:Gray/White, 수:Black/Blue).
-    4. 오행 분석(Ohaeng): 전체 사주에서 오행의 분포 비율(%)을 계산하세요. 합이 100이 되도록 하세요.
-    5. 대운(Daewoon): 사용자의 대운수(Daewoon number)를 계산하고, 10년 단위의 대운 흐름을 나열하세요 (나이, 간지 한자, 간지 한글).
-    6. 분석(Analysis): 일간(Day Master)을 중심으로 한 성격 분석과 2025년 기준 신년 운세를 친절하고 명확한 존댓말로 작성하세요.
+    1. 만세력(Pillars): 연주, 월주, 일주, 시주를 정확한 한자(char)와 **한글 독음(hangul)**과 함께 구하세요.
+    2. 기둥별 상세 풀이(Pillar Analysis): 각 기둥의 의미를 초보자도 이해하기 쉬운 3줄 이내 설명으로 작성.
+    3. 색상(Color): 오행 색상 Hex Code (목:Green, 화:Red, 토:Yellow, 금:Gray/White, 수:Black/Blue).
+    4. 오행 분석(Ohaeng): 전체 사주 오행 분포(%).
+    5. **십성 분석(Shipseong)**: 비겁(Self), 식상(Output), 재성(Wealth), 관성(Control), 인성(Resource)의 세력 분포를 퍼센트(%)로 계산하세요. (합이 100%).
+    6. **신강/신약 분석(Strength)**: 사주의 신강/신약 정도를 0~100 점수로 평가하세요 (0: 극신약, 50: 중화, 100: 극신강). 그에 따른 레이블(예: 약간 신강, 중화 등)과 짧은 설명을 포함하세요.
+    7. 대운(Daewoon): 대운수와 10년 단위 대운 흐름.
+    8. 분석(Analysis): 일간(Day Master) 중심 성격 분석과 2025년 신년 운세.
 
     JSON 스키마를 엄격히 따라주세요.
   `;
