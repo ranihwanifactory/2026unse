@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { UserSajuData, ManseResult, ChongunResult, GunghapResult, LottoLuckResult } from "../types";
+import { UserSajuData, ManseResult, ChongunResult, GunghapResult, LottoLuckResult, CelebMatchResult } from "../types";
 
 // Helper function to safely get the API Key
 const getApiKey = (): string | undefined => {
@@ -185,6 +185,20 @@ const lottoLuckSchema: Schema = {
     luckyColor: { type: Type.STRING },
     direction: { type: Type.STRING },
     reason: { type: Type.STRING, description: "Reasoning based on Saju elements" }
+  }
+};
+
+// --- Schema definitions for CelebMatchResult ---
+const celebMatchSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    celebrityName: { type: Type.STRING, description: "Name of the matching celebrity" },
+    celebrityJob: { type: Type.STRING },
+    compatibilityScore: { type: Type.NUMBER },
+    matchReason: { type: Type.STRING, description: "Why they fit based on Saju logic" },
+    keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+    userElement: { type: Type.STRING, description: "User's Day Master element" },
+    celebElement: { type: Type.STRING, description: "Celebrity's presumed element" }
   }
 };
 
@@ -380,4 +394,53 @@ export const getLottoLuck = async (data: UserSajuData): Promise<LottoLuckResult>
 
   if (response.text) return JSON.parse(response.text) as LottoLuckResult;
   throw new Error("로또 번호 추천 실패");
+};
+
+export const getCelebMatch = async (data: UserSajuData): Promise<CelebMatchResult> => {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("API Key가 설정되지 않았습니다.");
+
+  const ai = new GoogleGenAI({ apiKey: apiKey });
+  const model = "gemini-2.5-flash";
+
+  const oppositeGender = data.gender === '남성' ? '여성' : '남성';
+
+  const prompt = `
+    당신은 사주 궁합 전문 커플매니저입니다. 
+    사용자의 사주(일간, 부족한 오행, 기질)를 분석하여, 
+    가장 찰떡궁합인 **한국 유명 연예인(${oppositeGender})**을 한 명 추천해주세요.
+    
+    [사용자 정보]
+    이름: ${data.name}
+    성별: ${data.gender}
+    생년월일: ${data.birthDate} (${data.calendarType})
+    시간: ${data.birthTime}
+
+    [매칭 로직]
+    1. 사용자의 일간(Day Master)과 오행 구조를 파악하세요.
+    2. 사용자에게 부족한 기운을 가지고 있거나, 천간합/지지합이 되는 유명한 한국 연예인(${oppositeGender})을 선택하세요.
+    3. 연예인의 사주 정보는 당신이 가진 학습 데이터를 바탕으로 추정하여 판단하세요.
+
+    [요구사항]
+    1. 추천 연예인 이름과 직업
+    2. 궁합 점수 (0-100)
+    3. 사주학적 추천 이유 (예: 당신은 불의 기운이 강해 물의 기운을 가진 OOO과 잘 맞습니다.)
+    4. 두 사람의 케미를 나타내는 키워드 3개
+
+    JSON 스키마를 준수하세요.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: model,
+    contents: prompt,
+    config: {
+      systemInstruction: "You are a K-Saju Matchmaker. Recommend a famous Korean celebrity of the opposite gender based on Saju compatibility.",
+      responseMimeType: "application/json",
+      responseSchema: celebMatchSchema,
+      temperature: 0.7,
+    },
+  });
+
+  if (response.text) return JSON.parse(response.text) as CelebMatchResult;
+  throw new Error("연예인 매칭 실패");
 };

@@ -107,7 +107,26 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
           </div>
         </button>
 
-        {/* App Card 4: Lotto Generator */}
+        {/* App Card 4: Celebrity Match (New) */}
+        <button 
+          onClick={() => onSelectApp(AppMode.CELEB_MATCH)}
+          className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 z-0 group-hover:bg-indigo-100 transition-colors"></div>
+          <div className="relative z-10">
+            <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-2xl mb-4">
+              💍
+            </div>
+            <h3 className="font-bold text-lg text-gray-800 mb-1">내 연예인 짝꿍은?</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              나의 사주와 찰떡궁합인 이성 연예인을<br/>
+              찾아보고 이유를 확인해보세요.<br/>
+              <span className="text-indigo-500 font-bold">New!</span>
+            </p>
+          </div>
+        </button>
+
+        {/* App Card 5: Lotto Generator */}
         <button 
           onClick={() => onSelectApp(AppMode.LOTTO)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -130,7 +149,6 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
         <div className="bg-gray-100 rounded-3xl p-6 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
            <span className="text-2xl mb-2">🔜</span>
            <span className="text-sm font-medium">새로운 기능 준비 중</span>
-           <span className="text-xs mt-1">토정비결, 타로 등</span>
         </div>
 
       </div>

@@ -8,11 +8,12 @@ import FortuneDisplay from './components/FortuneDisplay';
 import ChongunDisplay from './components/ChongunDisplay';
 import GunghapDisplay from './components/GunghapDisplay';
 import LottoGenerator from './components/LottoGenerator';
+import CelebMatchDisplay from './components/CelebMatchDisplay';
 import KakaoAdFit from './components/KakaoAdFit';
 import AuthScreen from './components/AuthScreen';
 import Profile from './components/Profile';
-import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult } from './types';
-import { getGeminiFortune, getChongunFortune, getGunghapFortune } from './services/fortuneService';
+import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult, CelebMatchResult } from './types';
+import { getGeminiFortune, getChongunFortune, getGunghapFortune, getCelebMatch } from './services/fortuneService';
 import { auth, getUserProfile, saveUserProfile, logoutUser } from './services/firebase';
 import { User, onAuthStateChanged } from 'firebase/auth';
 
@@ -31,6 +32,7 @@ const App: React.FC = () => {
   const [manseResult, setManseResult] = useState<ManseResult | null>(null);
   const [chongunResult, setChongunResult] = useState<ChongunResult | null>(null);
   const [gunghapResult, setGunghapResult] = useState<GunghapResult | null>(null);
+  const [celebMatchResult, setCelebMatchResult] = useState<CelebMatchResult | null>(null);
   
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
@@ -127,7 +129,7 @@ const App: React.FC = () => {
     setAppMode(mode);
     
     // Check if user has data (Logged in users with saved profile)
-    if (userData && (mode === AppMode.MANSE || mode === AppMode.CHONGUN || mode === AppMode.LOTTO)) {
+    if (userData && (mode === AppMode.MANSE || mode === AppMode.CHONGUN || mode === AppMode.LOTTO || mode === AppMode.CELEB_MATCH)) {
       if (mode === AppMode.LOTTO) {
         setAppState(AppState.RESULT); 
       } else {
@@ -164,6 +166,9 @@ const App: React.FC = () => {
       } else if (appMode === AppMode.CHONGUN) {
         const result = await getChongunFortune(data);
         setChongunResult(result);
+      } else if (appMode === AppMode.CELEB_MATCH) {
+        const result = await getCelebMatch(data);
+        setCelebMatchResult(result);
       }
       setAppState(AppState.RESULT);
     } catch (error) {
@@ -193,6 +198,7 @@ const App: React.FC = () => {
     setManseResult(null);
     setChongunResult(null);
     setGunghapResult(null);
+    setCelebMatchResult(null);
     setAppState(AppState.HUB);
   };
 
@@ -289,6 +295,16 @@ const App: React.FC = () => {
                isGuest={!currentUser}
              />
            );
+        } else if (appMode === AppMode.CELEB_MATCH && celebMatchResult && userData) {
+          return (
+            <CelebMatchDisplay
+              result={celebMatchResult}
+              userData={userData}
+              onReset={handleResetToMenu}
+              onOpenProfile={handleOpenProfile}
+              isGuest={!currentUser}
+            />
+          );
         } else {
           return (
             <div className="flex flex-col items-center justify-center min-h-screen p-4">

@@ -121,6 +121,17 @@ export interface LottoLuckResult {
   reason: string; // Why these numbers? (Based on element/Saju)
 }
 
+// New Interface for Celebrity Match
+export interface CelebMatchResult {
+  celebrityName: string;
+  celebrityJob: string; // e.g., 배우, 가수
+  compatibilityScore: number;
+  matchReason: string; // 사주학적 매칭 이유
+  keywords: string[]; // 매칭 키워드
+  userElement: string; // 사용자 일간
+  celebElement: string; // 연예인 추정 일간
+}
+
 export enum AppState {
   WELCOME,
   AUTH,     // Login/Signup
@@ -132,8 +143,9 @@ export enum AppState {
 }
 
 export enum AppMode {
-  MANSE,    // Classic Manse Chart
-  CHONGUN,  // General Fortune Text
-  GUNGHAP,  // Compatibility
-  LOTTO,    // Lotto Generator
+  MANSE,      // Classic Manse Chart
+  CHONGUN,    // General Fortune Text
+  GUNGHAP,    // Compatibility
+  LOTTO,      // Lotto Generator
+  CELEB_MATCH // Celebrity Match
 }
