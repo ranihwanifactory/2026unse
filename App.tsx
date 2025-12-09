@@ -7,6 +7,7 @@ import RitualLoading from './components/RitualLoading';
 import FortuneDisplay from './components/FortuneDisplay';
 import ChongunDisplay from './components/ChongunDisplay';
 import GunghapDisplay from './components/GunghapDisplay';
+import KakaoAdFit from './components/KakaoAdFit';
 import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult } from './types';
 import { getGeminiFortune, getChongunFortune, getGunghapFortune } from './services/fortuneService';
 
@@ -175,8 +176,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="antialiased min-h-screen font-sans text-gray-900 bg-[#f8f9fa]">
-      {renderScreen()}
+    <div className="antialiased min-h-screen font-sans text-gray-900 bg-[#f8f9fa] flex flex-col">
+      <div className="flex-grow">
+        {renderScreen()}
+      </div>
+      
+      {/* Kakao AdFit Footer */}
+      <footer className="w-full bg-[#f8f9fa]">
+        <KakaoAdFit />
+      </footer>
     </div>
   );
 };
