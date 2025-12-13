@@ -9,11 +9,12 @@ import ChongunDisplay from './components/ChongunDisplay';
 import GunghapDisplay from './components/GunghapDisplay';
 import LottoGenerator from './components/LottoGenerator';
 import CelebMatchDisplay from './components/CelebMatchDisplay';
+import TravelDisplay from './components/TravelDisplay';
 import KakaoAdFit from './components/KakaoAdFit';
 import AuthScreen from './components/AuthScreen';
 import Profile from './components/Profile';
-import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult, CelebMatchResult } from './types';
-import { getGeminiFortune, getChongunFortune, getGunghapFortune, getCelebMatch } from './services/fortuneService';
+import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult, CelebMatchResult, TravelRecommendResult } from './types';
+import { getGeminiFortune, getChongunFortune, getGunghapFortune, getCelebMatch, getTravelRecommendation } from './services/fortuneService';
 import { auth, getUserProfile, saveUserProfile, logoutUser } from './services/firebase';
 import { User, onAuthStateChanged } from 'firebase/auth';
 
@@ -33,6 +34,7 @@ const App: React.FC = () => {
   const [chongunResult, setChongunResult] = useState<ChongunResult | null>(null);
   const [gunghapResult, setGunghapResult] = useState<GunghapResult | null>(null);
   const [celebMatchResult, setCelebMatchResult] = useState<CelebMatchResult | null>(null);
+  const [travelResult, setTravelResult] = useState<TravelRecommendResult | null>(null);
   
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
@@ -129,7 +131,7 @@ const App: React.FC = () => {
     setAppMode(mode);
     
     // Check if user has data (Logged in users with saved profile)
-    if (userData && (mode === AppMode.MANSE || mode === AppMode.CHONGUN || mode === AppMode.LOTTO || mode === AppMode.CELEB_MATCH)) {
+    if (userData && (mode === AppMode.MANSE || mode === AppMode.CHONGUN || mode === AppMode.LOTTO || mode === AppMode.CELEB_MATCH || mode === AppMode.TRAVEL)) {
       if (mode === AppMode.LOTTO) {
         setAppState(AppState.RESULT); 
       } else {
@@ -169,6 +171,9 @@ const App: React.FC = () => {
       } else if (appMode === AppMode.CELEB_MATCH) {
         const result = await getCelebMatch(data);
         setCelebMatchResult(result);
+      } else if (appMode === AppMode.TRAVEL) {
+        const result = await getTravelRecommendation(data);
+        setTravelResult(result);
       }
       setAppState(AppState.RESULT);
     } catch (error) {
@@ -199,6 +204,7 @@ const App: React.FC = () => {
     setChongunResult(null);
     setGunghapResult(null);
     setCelebMatchResult(null);
+    setTravelResult(null);
     setAppState(AppState.HUB);
   };
 
@@ -299,6 +305,16 @@ const App: React.FC = () => {
           return (
             <CelebMatchDisplay
               result={celebMatchResult}
+              userData={userData}
+              onReset={handleResetToMenu}
+              onOpenProfile={handleOpenProfile}
+              isGuest={!currentUser}
+            />
+          );
+        } else if (appMode === AppMode.TRAVEL && travelResult && userData) {
+          return (
+            <TravelDisplay
+              result={travelResult}
               userData={userData}
               onReset={handleResetToMenu}
               onOpenProfile={handleOpenProfile}

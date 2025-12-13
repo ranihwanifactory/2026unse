@@ -107,7 +107,26 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
           </div>
         </button>
 
-        {/* App Card 4: Celebrity Match (New) */}
+        {/* App Card 4: Travel Recommendation (New) */}
+        <button 
+          onClick={() => onSelectApp(AppMode.TRAVEL)}
+          className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-bl-full -mr-8 -mt-8 z-0 group-hover:bg-green-100 transition-colors"></div>
+          <div className="relative z-10">
+            <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-2xl mb-4">
+              ✈️
+            </div>
+            <h3 className="font-bold text-lg text-gray-800 mb-1">행운의 여행지</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              나에게 부족한 기운을 채워주는<br/>
+              국내외 맞춤 여행지를 추천해드려요.<br/>
+              <span className="text-green-500 font-bold">New!</span>
+            </p>
+          </div>
+        </button>
+
+        {/* App Card 5: Celebrity Match */}
         <button 
           onClick={() => onSelectApp(AppMode.CELEB_MATCH)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -120,13 +139,12 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
             <h3 className="font-bold text-lg text-gray-800 mb-1">내 연예인 짝꿍은?</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
               나의 사주와 찰떡궁합인 이성 연예인을<br/>
-              찾아보고 이유를 확인해보세요.<br/>
-              <span className="text-indigo-500 font-bold">New!</span>
+              찾아보고 이유를 확인해보세요.
             </p>
           </div>
         </button>
 
-        {/* App Card 5: Lotto Generator */}
+        {/* App Card 6: Lotto Generator */}
         <button 
           onClick={() => onSelectApp(AppMode.LOTTO)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -139,17 +157,10 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
             <h3 className="font-bold text-lg text-gray-800 mb-1">사주 로또 생성기</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
               나의 사주에 부족한 기운을 채우는<br/>
-              행운의 숫자를 추천받고<br/>
-              자동/반자동 번호를 조합해보세요.
+              행운의 숫자를 추천받아보세요.
             </p>
           </div>
         </button>
-
-        {/* Placeholder for future apps */}
-        <div className="bg-gray-100 rounded-3xl p-6 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
-           <span className="text-2xl mb-2">🔜</span>
-           <span className="text-sm font-medium">새로운 기능 준비 중</span>
-        </div>
 
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { UserSajuData, ManseResult, ChongunResult, GunghapResult, LottoLuckResult, CelebMatchResult } from "../types";
+import { UserSajuData, ManseResult, ChongunResult, GunghapResult, LottoLuckResult, CelebMatchResult, TravelRecommendResult } from "../types";
 
 // Helper function to safely get the API Key
 const getApiKey = (): string | undefined => {
@@ -199,6 +199,33 @@ const celebMatchSchema: Schema = {
     keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
     userElement: { type: Type.STRING, description: "User's Day Master element" },
     celebElement: { type: Type.STRING, description: "Celebrity's presumed element" }
+  }
+};
+
+// --- Schema definitions for TravelRecommendResult ---
+const travelRecommendSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    elementAnalysis: { type: Type.STRING, description: "Analysis of missing elements and needed energy" },
+    domestic: {
+      type: Type.OBJECT,
+      properties: {
+        place: { type: Type.STRING, description: "Specific city or place in Korea" },
+        location: { type: Type.STRING, description: "Province or broader region" },
+        reason: { type: Type.STRING, description: "Why this fits the user's saju" },
+        activity: { type: Type.STRING, description: "Recommended activity there" }
+      }
+    },
+    international: {
+      type: Type.OBJECT,
+      properties: {
+        place: { type: Type.STRING, description: "City or region abroad" },
+        country: { type: Type.STRING },
+        reason: { type: Type.STRING, description: "Why this fits the user's saju" },
+        activity: { type: Type.STRING, description: "Recommended activity there" }
+      }
+    },
+    travelTip: { type: Type.STRING, description: "General travel advice based on Saju" }
   }
 };
 
@@ -443,4 +470,52 @@ export const getCelebMatch = async (data: UserSajuData): Promise<CelebMatchResul
 
   if (response.text) return JSON.parse(response.text) as CelebMatchResult;
   throw new Error("연예인 매칭 실패");
+};
+
+export const getTravelRecommendation = async (data: UserSajuData): Promise<TravelRecommendResult> => {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("API Key가 설정되지 않았습니다.");
+
+  const ai = new GoogleGenAI({ apiKey: apiKey });
+  const model = "gemini-2.5-flash";
+
+  const prompt = `
+    당신은 풍수지리와 사주 명리학에 능통한 여행 컨설턴트입니다.
+    사용자의 사주에서 **부족한 오행(용신/희신)**이나 **필요한 기운**을 분석하여,
+    이를 보완해줄 수 있는 **국내(한국) 여행지**와 **해외 여행지**를 각각 하나씩 추천해주세요.
+
+    [사용자 정보]
+    이름: ${data.name}
+    성별: ${data.gender}
+    생년월일: ${data.birthDate} (${data.calendarType})
+    시간: ${data.birthTime}
+    출생지: ${data.birthRegion}
+
+    [분석 및 추천 로직]
+    1. 사주 오행 분석: 사용자에게 부족한 오행(목, 화, 토, 금, 수)을 찾으세요.
+       - 목(Wood) 부족: 숲, 휴양림, 동쪽
+       - 화(Fire) 부족: 따뜻한 남쪽, 화려한 도시, 해변(태양)
+       - 토(Earth) 부족: 산, 고원, 중앙/내륙, 트레킹
+       - 금(Metal) 부족: 바위산, 서쪽, 현대적인 금속 도시
+       - 수(Water) 부족: 바다, 강, 호수, 북쪽, 온천
+    2. 국내 여행지 1곳 추천 (구체적인 지명, 예: 강릉, 제주도, 경주 등)
+    3. 해외 여행지 1곳 추천 (구체적인 도시/국가, 예: 다낭, 삿포로, 뉴욕 등)
+    4. 추천 이유를 사주학적 관점(부족한 기운 보충, 방위 등)에서 설명하세요.
+
+    JSON 스키마를 엄격히 준수하세요.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: model,
+    contents: prompt,
+    config: {
+      systemInstruction: "You are a Feng Shui and Saju Travel Expert. Recommend travel destinations based on user's lucky elements.",
+      responseMimeType: "application/json",
+      responseSchema: travelRecommendSchema,
+      temperature: 0.7,
+    },
+  });
+
+  if (response.text) return JSON.parse(response.text) as TravelRecommendResult;
+  throw new Error("여행지 추천 실패");
 };

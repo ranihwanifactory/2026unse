@@ -132,6 +132,24 @@ export interface CelebMatchResult {
   celebElement: string; // 연예인 추정 일간
 }
 
+// New Interface for Travel Recommendation
+export interface TravelRecommendResult {
+  elementAnalysis: string; // Short analysis of missing/needed elements
+  domestic: {
+    place: string; // City or specific spot in Korea
+    location: string; // Province or Region
+    reason: string; // Why this place fits the Saju
+    activity: string; // Recommended activity
+  };
+  international: {
+    place: string; // City or Region
+    country: string; // Country name
+    reason: string; // Why this place fits the Saju
+    activity: string; // Recommended activity
+  };
+  travelTip: string; // General travel luck tip
+}
+
 export enum AppState {
   WELCOME,
   AUTH,     // Login/Signup
@@ -147,5 +165,6 @@ export enum AppMode {
   CHONGUN,    // General Fortune Text
   GUNGHAP,    // Compatibility
   LOTTO,      // Lotto Generator
-  CELEB_MATCH // Celebrity Match
+  CELEB_MATCH, // Celebrity Match
+  TRAVEL      // Travel Recommendation
 }
