@@ -191,7 +191,7 @@ const App: React.FC = () => {
                 <span className="text-gray-300">|</span>
                 <a href="mailto:hwanace@naver.com">hwanace@naver.com</a>
                 <span className="text-gray-300">|</span>
-                <span>Made by 도형파파팩토리</span>
+                <span>Made by <a href="https://ranihwanibaby.tistory.com/" target="_blank">도형파파팩토리</a></span>
              </div>
           </div>
         </footer>
