@@ -10,16 +10,17 @@ import GunghapDisplay from './components/GunghapDisplay';
 import LottoGenerator from './components/LottoGenerator';
 import CelebMatchDisplay from './components/CelebMatchDisplay';
 import TravelDisplay from './components/TravelDisplay';
+import SamjaeDisplay from './components/SamjaeDisplay';
 import KakaoAdFit from './components/KakaoAdFit';
 import AuthScreen from './components/AuthScreen';
 import Profile from './components/Profile';
-import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult, CelebMatchResult, TravelRecommendResult } from './types';
-import { getGeminiFortune, getChongunFortune, getGunghapFortune, getCelebMatch, getTravelRecommendation } from './services/fortuneService';
+import { AppState, AppMode, UserSajuData, ManseResult, ChongunResult, GunghapResult, CelebMatchResult, TravelRecommendResult, SamjaeResult } from './types';
+import { getGeminiFortune, getChongunFortune, getGunghapFortune, getCelebMatch, getTravelRecommendation, getSamjaeFortune } from './services/fortuneService';
 import { auth, getUserProfile, saveUserProfile, logoutUser } from './services/firebase';
 import { User, onAuthStateChanged } from 'firebase/auth';
 
 const App: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>(AppState.WELCOME);
+  const [appState, setAppState] = useState<AppState>(AppState.HUB);
   const [appMode, setAppMode] = useState<AppMode>(AppMode.MANSE);
   
   // Auth State
@@ -35,11 +36,11 @@ const App: React.FC = () => {
   const [gunghapResult, setGunghapResult] = useState<GunghapResult | null>(null);
   const [celebMatchResult, setCelebMatchResult] = useState<CelebMatchResult | null>(null);
   const [travelResult, setTravelResult] = useState<TravelRecommendResult | null>(null);
+  const [samjaeResult, setSamjaeResult] = useState<SamjaeResult | null>(null);
   
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   useEffect(() => {
-    // Listen for PWA install prompt
     const handler = (e: any) => {
       e.preventDefault();
       setInstallPrompt(e);
@@ -48,23 +49,18 @@ const App: React.FC = () => {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // Firebase Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        // User logged in, fetch profile
         try {
           const profile = await getUserProfile(user.uid);
           if (profile) {
             setUserData(profile);
-            // If we are currently in AUTH or WELCOME, go to HUB
             if (appState === AppState.AUTH || appState === AppState.WELCOME) {
                setAppState(AppState.HUB);
             }
           } else {
-            // New user, no profile yet. 
-            // If they are coming from AuthScreen, send to Input to create profile
             if (appState === AppState.AUTH) {
                setAppState(AppState.INPUT);
             }
@@ -75,10 +71,8 @@ const App: React.FC = () => {
       } else {
         setCurrentUser(null);
         setUserData(null);
-        // If logged out, we generally don't force page change unless strictly required
-        // But if in Profile/Auth, go to Welcome
         if (appState === AppState.PROFILE) {
-           setAppState(AppState.WELCOME);
+           setAppState(AppState.HUB);
         }
       }
     });
@@ -94,106 +88,61 @@ const App: React.FC = () => {
     }
   };
 
-  // Welcome -> Main (Start)
-  const handleEnterWelcome = () => {
-    // Allows Guest Access: Always go to HUB.
-    // If logged in, the AuthListener might have already moved us, but this is safe.
-    setAppState(AppState.HUB);
-  };
-
-  // Welcome -> Auth (Login Click)
-  const handleLoginEnter = () => {
-    setAppState(AppState.AUTH);
-  };
-
-  // Auth -> Back
-  const handleAuthBack = () => {
-    setAppState(AppState.WELCOME);
-  };
-
-  // Logout
+  const handleEnterWelcome = () => setAppState(AppState.HUB);
+  const handleLoginEnter = () => setAppState(AppState.AUTH);
+  const handleAuthBack = () => setAppState(AppState.HUB);
   const handleLogout = async () => {
     await logoutUser();
-    setAppState(AppState.WELCOME);
+    setAppState(AppState.HUB);
   };
-
-  // Hub/App -> Profile (or Login if guest)
   const handleOpenProfile = () => {
-    if (currentUser) {
-      setAppState(AppState.PROFILE);
-    } else {
-      setAppState(AppState.AUTH);
-    }
+    if (currentUser) setAppState(AppState.PROFILE);
+    else setAppState(AppState.AUTH);
   };
 
-  // Hub -> Input (with specific mode)
   const handleSelectApp = (mode: AppMode) => {
     setAppMode(mode);
-    
-    // Check if user has data (Logged in users with saved profile)
-    if (userData && (mode === AppMode.MANSE || mode === AppMode.CHONGUN || mode === AppMode.LOTTO || mode === AppMode.CELEB_MATCH || mode === AppMode.TRAVEL)) {
-      if (mode === AppMode.LOTTO) {
-        setAppState(AppState.RESULT); 
-      } else {
-        // Logged in user with data -> Skip input, go to loading/result
+    if (userData && (mode !== AppMode.GUNGHAP)) {
+      if (mode === AppMode.LOTTO) setAppState(AppState.RESULT);
+      else {
         setAppState(AppState.LOADING);
-        handleFormSubmit(userData); // Auto-submit existing data
+        handleFormSubmit(userData);
       }
     } else {
-      // Guest or New User -> Go to Input
       setAppState(AppState.INPUT);
     }
   };
 
-  // Input -> Loading -> Result (Single User)
   const handleFormSubmit = async (data: UserSajuData) => {
     setUserData(data);
-
-    // Save to Firestore ONLY if logged in
-    if (currentUser) {
-      saveUserProfile(currentUser.uid, data).catch(console.error);
-    }
-
+    if (currentUser) saveUserProfile(currentUser.uid, data).catch(console.error);
     if (appMode === AppMode.LOTTO) {
       setAppState(AppState.RESULT);
       return;
     }
-
     setAppState(AppState.LOADING);
-
     try {
-      if (appMode === AppMode.MANSE) {
-        const result = await getGeminiFortune(data);
-        setManseResult(result);
-      } else if (appMode === AppMode.CHONGUN) {
-        const result = await getChongunFortune(data);
-        setChongunResult(result);
-      } else if (appMode === AppMode.CELEB_MATCH) {
-        const result = await getCelebMatch(data);
-        setCelebMatchResult(result);
-      } else if (appMode === AppMode.TRAVEL) {
-        const result = await getTravelRecommendation(data);
-        setTravelResult(result);
-      }
+      if (appMode === AppMode.MANSE) setManseResult(await getGeminiFortune(data));
+      else if (appMode === AppMode.CHONGUN) setChongunResult(await getChongunFortune(data));
+      else if (appMode === AppMode.CELEB_MATCH) setCelebMatchResult(await getCelebMatch(data));
+      else if (appMode === AppMode.TRAVEL) setTravelResult(await getTravelRecommendation(data));
+      else if (appMode === AppMode.SAMJAE) setSamjaeResult(await getSamjaeFortune(data));
       setAppState(AppState.RESULT);
     } catch (error) {
-      alert("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n" + (error as Error).message);
-      setAppState(AppState.INPUT); 
+      alert("분석 중 오류 발생: " + (error as Error).message);
+      setAppState(AppState.HUB);
     }
   };
 
-  // Input -> Loading -> Result (Gunghap / Two Users)
   const handleGunghapSubmit = async (user1: UserSajuData, user2: UserSajuData) => {
     setUserData(user1);
     setPartnerData(user2);
     setAppState(AppState.LOADING);
-
     try {
-      const result = await getGunghapFortune(user1, user2);
-      setGunghapResult(result);
+      setGunghapResult(await getGunghapFortune(user1, user2));
       setAppState(AppState.RESULT);
     } catch (error) {
-      alert("궁합 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n" + (error as Error).message);
+      alert("궁합 분석 중 오류 발생: " + (error as Error).message);
       setAppState(AppState.INPUT);
     }
   };
@@ -205,173 +154,44 @@ const App: React.FC = () => {
     setGunghapResult(null);
     setCelebMatchResult(null);
     setTravelResult(null);
+    setSamjaeResult(null);
     setAppState(AppState.HUB);
   };
 
   const renderScreen = () => {
     switch (appState) {
-      case AppState.WELCOME:
-        return (
-          <WelcomeScreen 
-            onEnter={handleEnterWelcome} 
-            onLogin={handleLoginEnter}
-            installPrompt={installPrompt} 
-            onInstall={handleInstallApp} 
-          />
-        );
-      case AppState.AUTH:
-        return (
-          <AuthScreen onBack={handleAuthBack} />
-        );
-      case AppState.PROFILE:
-        return currentUser ? (
-          <Profile 
-            user={currentUser}
-            initialData={userData}
-            onBack={() => setAppState(AppState.HUB)}
-            onSaved={(data) => setUserData(data)}
-          />
-        ) : null;
-      case AppState.HUB:
-        return (
-          <MainHub 
-            onSelectApp={handleSelectApp} 
-            userName={userData?.name} 
-            isGuest={!currentUser}
-            onOpenProfile={handleOpenProfile}
-            onLogout={handleLogout}
-            onLogin={handleLoginEnter}
-          />
-        );
-      case AppState.INPUT:
-        if (appMode === AppMode.GUNGHAP) {
-          return (
-            <GunghapInputForm
-              onSubmit={handleGunghapSubmit}
-              onBack={() => setAppState(AppState.HUB)}
-            />
-          );
-        }
-        return (
-           <InputForm 
-             onSubmit={handleFormSubmit} 
-             onBack={() => setAppState(AppState.HUB)} 
-           />
-        );
-      case AppState.LOADING:
-        return <RitualLoading />;
+      case AppState.WELCOME: return <WelcomeScreen onEnter={handleEnterWelcome} onLogin={handleLoginEnter} installPrompt={installPrompt} onInstall={handleInstallApp} />;
+      case AppState.AUTH: return <AuthScreen onBack={handleAuthBack} />;
+      case AppState.PROFILE: return currentUser ? <Profile user={currentUser} initialData={userData} onBack={() => setAppState(AppState.HUB)} onSaved={(data) => setUserData(data)} /> : null;
+      case AppState.HUB: return <MainHub onSelectApp={handleSelectApp} userName={userData?.name} isGuest={!currentUser} onOpenProfile={handleOpenProfile} onLogout={handleLogout} onLogin={handleLoginEnter} installPrompt={installPrompt} onInstall={handleInstallApp} />;
+      case AppState.INPUT: return appMode === AppMode.GUNGHAP ? <GunghapInputForm onSubmit={handleGunghapSubmit} onBack={() => setAppState(AppState.HUB)} /> : <InputForm onSubmit={handleFormSubmit} onBack={() => setAppState(AppState.HUB)} />;
+      case AppState.LOADING: return <RitualLoading />;
       case AppState.RESULT:
-        if (appMode === AppMode.MANSE && manseResult && userData) {
-          return (
-            <FortuneDisplay 
-              result={manseResult} 
-              userData={userData} 
-              onReset={handleResetToMenu} 
-              onOpenProfile={handleOpenProfile}
-              isGuest={!currentUser}
-            />
-          );
-        } else if (appMode === AppMode.CHONGUN && chongunResult && userData) {
-          return (
-            <ChongunDisplay 
-              result={chongunResult} 
-              userData={userData} 
-              onReset={handleResetToMenu}
-              onOpenProfile={handleOpenProfile}
-              isGuest={!currentUser}
-            />
-          );
-        } else if (appMode === AppMode.GUNGHAP && gunghapResult && userData && partnerData) {
-          return (
-            <GunghapDisplay
-              result={gunghapResult}
-              user1={userData}
-              user2={partnerData}
-              onReset={handleResetToMenu}
-              onOpenProfile={handleOpenProfile}
-              isGuest={!currentUser}
-            />
-          );
-        } else if (appMode === AppMode.LOTTO && userData) {
-           return (
-             <LottoGenerator
-               userData={userData}
-               onReset={handleResetToMenu}
-               onOpenProfile={handleOpenProfile}
-               isGuest={!currentUser}
-             />
-           );
-        } else if (appMode === AppMode.CELEB_MATCH && celebMatchResult && userData) {
-          return (
-            <CelebMatchDisplay
-              result={celebMatchResult}
-              userData={userData}
-              onReset={handleResetToMenu}
-              onOpenProfile={handleOpenProfile}
-              isGuest={!currentUser}
-            />
-          );
-        } else if (appMode === AppMode.TRAVEL && travelResult && userData) {
-          return (
-            <TravelDisplay
-              result={travelResult}
-              userData={userData}
-              onReset={handleResetToMenu}
-              onOpenProfile={handleOpenProfile}
-              isGuest={!currentUser}
-            />
-          );
-        } else {
-          return (
-            <div className="flex flex-col items-center justify-center min-h-screen p-4">
-              <p className="mb-4">데이터 로딩 오류가 발생했습니다.</p>
-              <button onClick={handleResetToMenu} className="px-4 py-2 bg-gray-200 rounded">홈으로</button>
-            </div>
-          );
-        }
-      default:
-        return null;
+        if (appMode === AppMode.MANSE && manseResult && userData) return <FortuneDisplay result={manseResult} userData={userData} onReset={handleResetToMenu} onOpenProfile={handleOpenProfile} isGuest={!currentUser} />;
+        if (appMode === AppMode.CHONGUN && chongunResult && userData) return <ChongunDisplay result={chongunResult} userData={userData} onReset={handleResetToMenu} onOpenProfile={handleOpenProfile} isGuest={!currentUser} />;
+        if (appMode === AppMode.GUNGHAP && gunghapResult && userData && partnerData) return <GunghapDisplay result={gunghapResult} user1={userData} user2={partnerData} onReset={handleResetToMenu} onOpenProfile={handleOpenProfile} isGuest={!currentUser} />;
+        if (appMode === AppMode.LOTTO && userData) return <LottoGenerator userData={userData} onReset={handleResetToMenu} onOpenProfile={handleOpenProfile} isGuest={!currentUser} />;
+        if (appMode === AppMode.CELEB_MATCH && celebMatchResult && userData) return <CelebMatchDisplay result={celebMatchResult} userData={userData} onReset={handleResetToMenu} onOpenProfile={handleOpenProfile} isGuest={!currentUser} />;
+        if (appMode === AppMode.TRAVEL && travelResult && userData) return <TravelDisplay result={travelResult} userData={userData} onReset={handleResetToMenu} onOpenProfile={handleOpenProfile} isGuest={!currentUser} />;
+        if (appMode === AppMode.SAMJAE && samjaeResult && userData) return <SamjaeDisplay result={samjaeResult} userData={userData} onReset={handleResetToMenu} onOpenProfile={handleOpenProfile} isGuest={!currentUser} />;
+        return <div className="text-center p-20"><button onClick={handleResetToMenu} className="p-4 bg-gray-200 rounded">홈으로</button></div>;
+      default: return null;
     }
   };
 
   return (
     <div className="antialiased min-h-screen font-sans text-gray-900 bg-[#f8f9fa] flex flex-col">
-      <div className="flex-grow">
-        {renderScreen()}
-      </div>
-      
-      {/* Kakao AdFit & Info Footer - Hide on Auth Screen */}
+      <div className="flex-grow">{renderScreen()}</div>
       {appState !== AppState.AUTH && (
         <footer className="w-full bg-[#f8f9fa] flex flex-col items-center pb-8 pt-4">
           <KakaoAdFit />
-          
           <div className="w-full max-w-3xl px-6 py-6 border-t border-gray-200 flex flex-col items-center gap-3 text-center mt-4">
              <div className="text-[11px] text-gray-400 flex flex-wrap justify-center items-center gap-2">
                 <span className="font-medium text-gray-500">내운명만세력</span>
                 <span className="text-gray-300">|</span>
-                <a href="mailto:hwanace@naver.com" className="hover:text-gray-600 hover:underline">hwanace@naver.com</a>
+                <a href="mailto:hwanace@naver.com">hwanace@naver.com</a>
                 <span className="text-gray-300">|</span>
                 <span>Made by 도형파파팩토리</span>
-             </div>
-             
-             <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500">
-                <span className="font-bold text-gray-400">Family Sites</span>
-                <a 
-                  href="https://ranihwanibaby.tistory.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm text-gray-600"
-                >
-                  📝 티스토리
-                </a>
-                <a 
-                  href="https://dreamlabapp.vercel.app/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm text-gray-600"
-                >
-                  💤 드림랩 (꿈해몽)
-                </a>
              </div>
           </div>
         </footer>

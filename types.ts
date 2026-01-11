@@ -15,23 +15,22 @@ export interface UserSajuData {
   birthDate: string; // YYYY-MM-DD
   birthTime: string; // HH:mm or "unknown"
   calendarType: CalendarType;
-  birthRegion: string; // Added birth region
+  birthRegion: string;
 }
 
-// Ten Stems (Cheongan) and Twelve Branches (Jiji) structure
 export interface Pillar {
-  stem: { char: string; hangul: string; color: string; element: string; tenGod: string }; // 천간
-  branch: { char: string; hangul: string; color: string; element: string; tenGod: string; animal: string }; // 지지
-  shipseong: string[]; // 지장간 (Hidden stems) - simplified for display
-  unseong: string; // 12 Unseong (12운성)
-  sinsal: string[]; // Sinsal (신살)
+  stem: { char: string; hangul: string; color: string; element: string; tenGod: string };
+  branch: { char: string; hangul: string; color: string; element: string; tenGod: string; animal: string };
+  shipseong: string[];
+  unseong: string;
+  sinsal: string[];
 }
 
 export interface ManseResult {
   userInfo: {
-    animal: string; // 띠
-    color: string; // 띠 색상
-    element: string; // 일간 오행 (Day Master)
+    animal: string;
+    color: string;
+    element: string;
   };
   pillars: {
     year: Pillar;
@@ -40,10 +39,10 @@ export interface ManseResult {
     time: Pillar;
   };
   pillarAnalysis: {
-    year: string;  // 연주 풀이 (초년, 조상)
-    month: string; // 월주 풀이 (청년, 부모/사회)
-    day: string;   // 일주 풀이 (본인, 배우자)
-    time: string;  // 시주 풀이 (말년, 자식)
+    year: string;
+    month: string;
+    day: string;
+    time: string;
   };
   ohaeng: {
     wood: number;
@@ -51,120 +50,132 @@ export interface ManseResult {
     earth: number;
     metal: number;
     water: number;
-    missing: string[]; // 없는 오행
-    excess: string[]; // 과다 오행
+    missing: string[];
+    excess: string[];
   };
   shipseong: {
-    bi: number; // 비겁 (Friend/Self)
-    sik: number; // 식상 (Output)
-    jae: number; // 재성 (Wealth)
-    gwan: number; // 관성 (Power)
-    in: number; // 인성 (Resource)
+    bi: number;
+    sik: number;
+    jae: number;
+    gwan: number;
+    in: number;
   };
   strength: {
-    score: number; // 0 (Very Weak) to 100 (Very Strong), 50 is Neutral
-    label: string; // e.g., "신약", "중화", "신강"
+    score: number;
+    label: string;
     description: string;
   };
   daewoon: {
     age: number;
     stem: string;
-    stemHangul: string; // 대운 천간 한글
+    stemHangul: string;
     branch: string;
-    branchHangul: string; // 대운 지지 한글
-    tenGod: string; // 대운의 십성
+    branchHangul: string;
+    tenGod: string;
   }[];
   analysis: {
-    personality: string; // 성격 분석
-    currentYearLuck: string; // 올해 운세
-    advice: string; // 조언
+    personality: string;
+    currentYearLuck: string;
+    advice: string;
   };
 }
 
-// New Interface for General Fortune (Chongun)
 export interface ChongunResult {
   userName: string;
-  summary: string; // 사주 총론 요약
-  keywords: string[]; // 핵심 키워드 3~4개
+  summary: string;
+  keywords: string[];
   sections: {
-    selfView: string;   // 내가 아는 내 모습
-    othersView: string; // 남이 보는 내 모습
-    talent: string;     // 타고난 재능과 적성
-    wealth: string;     // 타고난 재물운
-    love: string;       // 타고난 애정운
-    work: string;       // 타고난 일복/직업
-    health: string;     // 타고난 건강/인복
+    selfView: string;
+    othersView: string;
+    talent: string;
+    wealth: string;
+    love: string;
+    work: string;
+    health: string;
   };
   advice: string;
 }
 
-// New Interface for Compatibility (Gunghap)
 export interface GunghapResult {
-  score: number; // 0 to 100
-  summary: string; // One line summary
+  score: number;
+  summary: string;
   details: {
-    personalityMatch: string; // 성격 궁합
-    valueMatch: string; // 가치관 궁합
-    loveStyle: string; // 연애 스타일
-    conflictResolution: string; // 갈등 해결 방식
+    personalityMatch: string;
+    valueMatch: string;
+    loveStyle: string;
+    conflictResolution: string;
   };
-  goodPoints: string[]; // 좋은 점 3가지
-  badPoints: string[]; // 주의할 점 3가지
-  advice: string; // 총평 및 조언
+  goodPoints: string[];
+  badPoints: string[];
+  advice: string;
 }
 
-// New Interface for Lotto Luck
 export interface LottoLuckResult {
-  luckyNumbers: number[]; // AI recommended 5-6 numbers
+  luckyNumbers: number[];
   luckyColor: string;
-  direction: string; // e.g., "서쪽"
-  reason: string; // Why these numbers? (Based on element/Saju)
+  direction: string;
+  reason: string;
 }
 
-// New Interface for Celebrity Match
 export interface CelebMatchResult {
   celebrityName: string;
-  celebrityJob: string; // e.g., 배우, 가수
+  celebrityJob: string;
   compatibilityScore: number;
-  matchReason: string; // 사주학적 매칭 이유
-  keywords: string[]; // 매칭 키워드
-  userElement: string; // 사용자 일간
-  celebElement: string; // 연예인 추정 일간
+  matchReason: string;
+  keywords: string[];
+  userElement: string;
+  celebElement: string;
 }
 
-// New Interface for Travel Recommendation
 export interface TravelRecommendResult {
-  elementAnalysis: string; // Short analysis of missing/needed elements
+  elementAnalysis: string;
   domestic: {
-    place: string; // City or specific spot in Korea
-    location: string; // Province or Region
-    reason: string; // Why this place fits the Saju
-    activity: string; // Recommended activity
+    place: string;
+    location: string;
+    reason: string;
+    activity: string;
   };
   international: {
-    place: string; // City or Region
-    country: string; // Country name
-    reason: string; // Why this place fits the Saju
-    activity: string; // Recommended activity
+    place: string;
+    country: string;
+    reason: string;
+    activity: string;
   };
-  travelTip: string; // General travel luck tip
+  travelTip: string;
+}
+
+export interface SamjaeResult {
+  userAnimal: string;
+  currentStatus: string; // e.g., "삼재 아님", "들삼재", "눌삼재", "날삼재"
+  years: {
+    deul: number; // 들삼재 연도
+    nul: number;  // 눌삼재 연도
+    nal: number;  // 날삼재 연도
+  };
+  analysis: {
+    meaning: string; // 해당 삼재의 의미 (복삼재, 평삼재, 악삼재 구분 포함)
+    caution: string[]; // 주의해야 할 점 3가지
+    remedy: string; // 액막이 비방 및 마음가짐
+  };
+  isGoodSamjae: boolean; // 복삼재 여부
 }
 
 export enum AppState {
   WELCOME,
-  AUTH,     // Login/Signup
-  PROFILE,  // User Profile Edit
-  HUB,      // Main Menu
+  AUTH,
+  PROFILE,
+  HUB,
   INPUT,
   LOADING,
   RESULT,
 }
 
 export enum AppMode {
-  MANSE,      // Classic Manse Chart
-  CHONGUN,    // General Fortune Text
-  GUNGHAP,    // Compatibility
-  LOTTO,      // Lotto Generator
-  CELEB_MATCH, // Celebrity Match
-  TRAVEL      // Travel Recommendation
+  MANSE,
+  CHONGUN,
+  GUNGHAP,
+  LOTTO,
+  CELEB_MATCH,
+  TRAVEL,
+  SAMJAE
 }

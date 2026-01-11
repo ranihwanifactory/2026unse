@@ -8,9 +8,11 @@ interface MainHubProps {
   onOpenProfile: () => void;
   onLogout: () => void;
   onLogin: () => void;
+  installPrompt?: any;
+  onInstall?: () => void;
 }
 
-const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpenProfile, onLogout, onLogin }) => {
+const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpenProfile, onLogout, onLogin, installPrompt, onInstall }) => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] p-4 flex flex-col fade-in">
       <header className="py-6 px-2 flex justify-between items-start">
@@ -21,6 +23,15 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
           <p className="text-gray-500 text-sm mt-1">오늘 당신에게 필요한 조언은 무엇인가요?</p>
         </div>
         <div className="flex gap-2">
+           {installPrompt && onInstall && (
+             <button
+               onClick={onInstall}
+               className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full card-shadow flex items-center justify-center text-lg hover:bg-indigo-100 transition-colors"
+               title="앱 설치"
+             >
+               ⬇️
+             </button>
+           )}
            {isGuest ? (
              <button 
                onClick={onLogin}
@@ -69,7 +80,26 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
           </div>
         </button>
 
-        {/* App Card 2: General Fortune (Chongun) */}
+        {/* App Card 2: Samjae (New) */}
+        <button 
+          onClick={() => onSelectApp(AppMode.SAMJAE)}
+          className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300 border-2 border-indigo-100"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 z-0 group-hover:bg-indigo-100 transition-colors"></div>
+          <div className="relative z-10">
+            <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-lg shadow-indigo-100">
+              🌙
+            </div>
+            <h3 className="font-bold text-lg text-gray-800 mb-1">나의 삼재 운세</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              조심해야 할 시기인가요?<br/>
+              삼재 주기와 액막이 비방을<br/>
+              AI가 맞춤형으로 알려드립니다.
+            </p>
+          </div>
+        </button>
+
+        {/* App Card 3: General Fortune (Chongun) */}
         <button 
           onClick={() => onSelectApp(AppMode.CHONGUN)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -88,7 +118,7 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
           </div>
         </button>
 
-        {/* App Card 3: Compatibility (Gunghap) */}
+        {/* App Card 4: Compatibility (Gunghap) */}
         <button 
           onClick={() => onSelectApp(AppMode.GUNGHAP)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -107,7 +137,7 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
           </div>
         </button>
 
-        {/* App Card 4: Travel Recommendation (New) */}
+        {/* App Card 5: Travel Recommendation */}
         <button 
           onClick={() => onSelectApp(AppMode.TRAVEL)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -120,13 +150,12 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
             <h3 className="font-bold text-lg text-gray-800 mb-1">행운의 여행지</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
               나에게 부족한 기운을 채워주는<br/>
-              국내외 맞춤 여행지를 추천해드려요.<br/>
-              <span className="text-green-500 font-bold">New!</span>
+              국내외 맞춤 여행지를 추천해드려요.
             </p>
           </div>
         </button>
 
-        {/* App Card 5: Celebrity Match */}
+        {/* App Card 6: Celebrity Match */}
         <button 
           onClick={() => onSelectApp(AppMode.CELEB_MATCH)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -144,7 +173,7 @@ const MainHub: React.FC<MainHubProps> = ({ onSelectApp, userName, isGuest, onOpe
           </div>
         </button>
 
-        {/* App Card 6: Lotto Generator */}
+        {/* App Card 7: Lotto Generator */}
         <button 
           onClick={() => onSelectApp(AppMode.LOTTO)}
           className="bg-white rounded-3xl p-6 card-shadow text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
